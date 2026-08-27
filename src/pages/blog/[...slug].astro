@@ -1,0 +1,71 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import { formatDate, isoDate } from '../../lib/date';
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const sorted = posts.sort((a, b) => b.data.published.getTime() - a.data.published.getTime());
+
+  return sorted.map((post, index) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      newer: sorted[index - 1] ?? null,
+      older: sorted[index + 1] ?? null,
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { post, newer, older } = Astro.props;
+const { Content } = await render(post);
+---
+
+<Base title={post.data.title} description={post.data.summary} ogType="article">
+  <article>
+    <header class="shell page-head">
+      <p class="mono muted">
+        <time datetime={isoDate(post.data.published)}>{formatDate(post.data.published)}</time>
+        {
+          post.data.updated && (
+            <span> / updated {formatDate(post.data.updated)}</span>
+          )
+        }
+      </p>
+      <h1 class="h2 hero__title page-head__title">{post.data.title}</h1>
+      <p class="row__meta follow">
+        {post.data.tags.map((tag) => <a class="tag" href={`/tags/${tag}/`}>{tag}</a>)}
+      </p>
+    </header>
+
+    <div class="shell rail draw">
+      <p class="rail__label">Text</p>
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+  </article>
+
+  <nav class="shell rail draw" aria-label="ほかの記事">
+    <p class="rail__label">More</p>
+    <div class="rows rows--flush">
+      {
+        older && (
+          <a class="row" href={`/blog/${older.id}/`}>
+            <span class="row__date">← 前の記事</span>
+            <span class="row__title">{older.data.title}</span>
+          </a>
+        )
+      }
+      {
+        newer && (
+          <a class="row" href={`/blog/${newer.id}/`}>
+            <span class="row__date">次の記事 →</span>
+            <span class="row__title">{newer.data.title}</span>
+          </a>
+        )
+      }
+    </div>
+  </nav>
+</Base>

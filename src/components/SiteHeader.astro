@@ -1,0 +1,21 @@
+---
+import { NAV, SITE } from '../config';
+
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+---
+
+<header class="masthead">
+  <div class="shell masthead__inner">
+    <a class="masthead__mark" href="/">{SITE.name}</a>
+    <nav class="nav" aria-label="サイト内">
+      {
+        NAV.map((item) => (
+          <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>

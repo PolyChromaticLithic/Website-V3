@@ -1,0 +1,719 @@
+@layer reset, tokens, base, layout, components, utilities;
+
+/* ─────────────────────────────────────────────── reset */
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  * {
+    margin: 0;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    min-height: 100svh;
+  }
+  img,
+  svg,
+  video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+  a {
+    color: inherit;
+  }
+  ul,
+  ol {
+    padding: 0;
+    list-style: none;
+  }
+  button,
+  input,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+  :where(h1, h2, h3, h4) {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+}
+
+/* ─────────────────────────────────────────────── tokens */
+@layer tokens {
+  :root {
+    color-scheme: light dark;
+
+    /* 冷たいエナメル地に濃紺インク。案内サインの配色。 */
+    --ground: oklch(0.967 0.004 250);
+    --surface: oklch(1 0 0);
+    --ink: oklch(0.235 0.02 258);
+    --ink-strong: oklch(0.165 0.024 258);
+    --ink-muted: oklch(0.535 0.016 258);
+    --rule: oklch(0.878 0.007 258);
+    --rule-soft: oklch(0.928 0.005 258);
+
+    /* シグナルは 3 色だけ。各色に役割がひとつずつ。 */
+    --signal: oklch(0.56 0.098 210); /* 予算内・リンク・現在地 */
+    --signal-dim: oklch(0.56 0.098 210 / 0.1);
+    --caution: oklch(0.735 0.148 76); /* 予算に近い */
+    --over: oklch(0.585 0.201 25); /* 予算超過 */
+
+    --font-sans:
+      system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+      "Yu Gothic", Meiryo, sans-serif;
+    --font-mono:
+      ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas, "Noto Sans Mono", "Yu Gothic",
+      monospace;
+
+    --t-2xs: 0.6875rem;
+    --t-xs: 0.75rem;
+    --t-sm: 0.8125rem;
+    --t-base: clamp(0.9375rem, 0.9rem + 0.18vw, 1.0625rem);
+    --t-lg: clamp(1.0625rem, 0.98rem + 0.4vw, 1.25rem);
+    --t-xl: clamp(1.375rem, 1.1rem + 1.2vw, 2rem);
+    --t-display: clamp(2.75rem, 1.1rem + 7.2vw, 5.75rem);
+
+    --shell: 62rem;
+    --measure: 38rem;
+    --rail: 7.5rem;
+    --gap: clamp(1.25rem, 4vw, 2rem);
+
+    --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: oklch(0.183 0.014 258);
+      --surface: oklch(0.223 0.016 258);
+      --ink: oklch(0.912 0.007 258);
+      --ink-strong: oklch(0.975 0.003 258);
+      --ink-muted: oklch(0.665 0.014 258);
+      --rule: oklch(0.318 0.014 258);
+      --rule-soft: oklch(0.262 0.014 258);
+      --signal: oklch(0.76 0.098 205);
+      --signal-dim: oklch(0.76 0.098 205 / 0.14);
+      --caution: oklch(0.815 0.14 80);
+      --over: oklch(0.695 0.18 27);
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────── base */
+@layer base {
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: var(--t-base);
+    line-height: 1.9;
+    display: flex;
+    flex-direction: column;
+  }
+
+  ::selection {
+    background: var(--signal);
+    color: var(--ground);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+    border-radius: 1px;
+  }
+
+  a {
+    text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
+  }
+  a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  /* ページ間トランジション。JS 0 バイト（未対応ブラウザは素の遷移） */
+  @view-transition {
+    navigation: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    @view-transition {
+      navigation: none;
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────── layout */
+@layer layout {
+  .shell {
+    width: 100%;
+    max-width: var(--shell);
+    margin-inline: auto;
+    padding-inline: var(--gap);
+  }
+
+  main {
+    flex: 1;
+  }
+
+  /* 左レールに小さなモノスペースのラベル、右に本文。仕様書の版面。 */
+  .rail {
+    display: grid;
+    gap: 0.5rem 2rem;
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  @media (width >= 56rem) {
+    .rail {
+      grid-template-columns: var(--rail) minmax(0, 1fr);
+    }
+  }
+
+  .rail__label {
+    font-family: var(--font-mono);
+    font-size: var(--t-2xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    padding-top: 0.45rem;
+  }
+
+  .stack {
+    display: grid;
+    gap: var(--flow, 1.25rem);
+  }
+}
+
+/* ─────────────────────────────────────────────── components */
+@layer components {
+  /* ── 見出し */
+  .display {
+    font-size: var(--t-display);
+    /* 和文のシステムフォントに 800 は無い。偽ボールドを避けて 700 に留める。 */
+    font-weight: 700;
+    /* 詰めと行間は和文の字面に合わせる。0.9 台にすると上下の行が接触する。 */
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    color: var(--ink-strong);
+    font-feature-settings: "palt" 1;
+    text-wrap: balance;
+    /* 和文の見出しを文節で折り返す。「ペー／ジ遷移」のような分断を防ぐ。 */
+    word-break: auto-phrase;
+  }
+  .h2 {
+    font-size: var(--t-xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.35;
+    color: var(--ink-strong);
+    font-feature-settings: "palt" 1;
+    text-wrap: balance;
+    word-break: auto-phrase;
+  }
+  .lede {
+    font-size: var(--t-lg);
+    text-wrap: pretty;
+  }
+  .muted {
+    color: var(--ink-muted);
+  }
+
+  .mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--t-xs);
+    letter-spacing: 0.02em;
+  }
+
+  /* ── ヘッダー */
+  .masthead {
+    border-bottom: 1px solid var(--rule);
+    background: color-mix(in oklab, var(--ground) 88%, transparent);
+    backdrop-filter: saturate(180%) blur(8px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    view-transition-name: masthead;
+  }
+  .masthead__inner {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    /* 縮めずに折り返す。狭い画面で横スクロールを作らないための保険。 */
+    flex-wrap: wrap;
+    gap: 0.35rem 1rem;
+    padding-block: 0.85rem;
+  }
+  .masthead__mark {
+    font-family: var(--font-mono);
+    font-size: var(--t-sm);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--ink-strong);
+    white-space: nowrap;
+  }
+  .masthead__mark::before {
+    content: "";
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-right: 0.5rem;
+    background: var(--signal);
+  }
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem clamp(0.85rem, 3vw, 1.6rem);
+  }
+  .nav a {
+    font-family: var(--font-mono);
+    font-size: var(--t-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink-muted);
+    padding-block: 0.15rem;
+    border-bottom: 2px solid transparent;
+  }
+  .nav a:hover {
+    color: var(--ink-strong);
+  }
+  .nav a[aria-current="page"] {
+    color: var(--ink-strong);
+    border-bottom-color: var(--signal);
+  }
+
+  @media (width < 26rem) {
+    .masthead__mark {
+      font-size: var(--t-xs);
+    }
+    .nav {
+      gap: 0.2rem 0.75rem;
+    }
+    .nav a {
+      font-size: var(--t-2xs);
+      letter-spacing: 0.04em;
+    }
+    .spec__figures {
+      gap: 0.5rem 1.4rem;
+    }
+  }
+
+  /* ── ヒーロー */
+  .hero {
+    padding-block: clamp(3rem, 11vw, 7rem) clamp(2rem, 6vw, 3.5rem);
+  }
+  .hero__title {
+    margin-top: 0.6rem;
+  }
+  .hero__tagline {
+    margin-top: 1.75rem;
+    max-width: 30rem;
+    font-size: var(--t-lg);
+    text-wrap: pretty;
+  }
+
+  /* ── 下層ページの見出し。トップのヒーローより控えめに組む。 */
+  .page-head {
+    padding-block: clamp(2.5rem, 7vw, 4.5rem) 1.5rem;
+  }
+  .page-head__title {
+    font-size: var(--t-xl);
+    margin-top: 0.4rem;
+    max-width: 40rem;
+  }
+  .page-head__meta {
+    margin-top: 1rem;
+  }
+
+  /* ── シグネチャ：このページ自身の実測値 */
+  .spec {
+    border-top: 1px solid var(--ink-strong);
+    border-bottom: 1px solid var(--rule);
+    padding-block: 0.9rem 1rem;
+    display: grid;
+    gap: 0.8rem;
+  }
+  .spec__head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.4rem 1.5rem;
+    font-family: var(--font-mono);
+    font-size: var(--t-2xs);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .spec__figures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2.25rem;
+  }
+  .spec__figures > div {
+    display: grid;
+    gap: 0.1rem;
+  }
+  .spec__figures dt {
+    font-family: var(--font-mono);
+    font-size: var(--t-2xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    line-height: 1.4;
+  }
+  .spec__figures dd {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--spec-size, clamp(1.05rem, 0.9rem + 0.7vw, 1.5rem));
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: var(--ink-strong);
+  }
+  .spec__figures dd small {
+    font-size: 0.62em;
+    font-weight: 400;
+    color: var(--ink-muted);
+  }
+  .spec--compact {
+    border-top-color: var(--rule);
+    --spec-size: 0.9375rem;
+  }
+
+  .meter {
+    position: relative;
+    height: 0.5rem;
+    background: var(--rule-soft);
+    overflow: hidden;
+  }
+  .meter__fill {
+    position: absolute;
+    inset: 0;
+    /* 予算に対する位置がそのまま色になる。塗りは clip で切り出すだけ。 */
+    background: linear-gradient(
+      90deg,
+      var(--signal) 0%,
+      var(--signal) 72%,
+      var(--caution) 90%,
+      var(--over) 100%
+    );
+    clip-path: inset(0 calc(100% - var(--ratio) * 100%) 0 0);
+  }
+  /* 塗られた状態を素の値にしておき、動きを許す環境でだけ左から伸ばす。
+     こうしておけばアニメーションが走らない環境でもバーは必ず見える。 */
+  @media (prefers-reduced-motion: no-preference) {
+    .meter__fill {
+      animation: meter-reveal 1s var(--ease) 0.15s both;
+    }
+  }
+  .meter__ticks {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent 0 calc(25% - 1px),
+      color-mix(in oklab, var(--ground) 65%, transparent) calc(25% - 1px) 25%
+    );
+  }
+  @keyframes meter-reveal {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+  }
+
+  /* ── 一覧行 */
+  .rows {
+    border-top: 1px solid var(--rule);
+  }
+  .row {
+    display: grid;
+    gap: 0.1rem 1.5rem;
+    padding-block: 1.1rem;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+    transition:
+      background-color 0.18s var(--ease),
+      padding-inline 0.18s var(--ease);
+  }
+  .row:hover,
+  .row:focus-visible {
+    background: var(--signal-dim);
+    padding-inline: 0.75rem;
+  }
+  @media (width >= 44rem) {
+    .row {
+      grid-template-columns: 7rem minmax(0, 1fr) auto;
+      align-items: baseline;
+    }
+  }
+  .row__date {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--t-xs);
+    color: var(--ink-muted);
+    letter-spacing: 0.02em;
+  }
+  .row__title {
+    font-size: var(--t-lg);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.5;
+    color: var(--ink-strong);
+    font-feature-settings: "palt" 1;
+    word-break: auto-phrase;
+  }
+  .row__summary {
+    font-size: var(--t-sm);
+    color: var(--ink-muted);
+    line-height: 1.75;
+    margin-top: 0.15rem;
+  }
+  .row__meta {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    padding-top: 0.35rem;
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: var(--t-2xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    border: 1px solid var(--rule);
+    padding: 0.05rem 0.4rem;
+    text-decoration: none;
+    white-space: nowrap;
+    line-height: 1.7;
+  }
+  a.tag:hover {
+    color: var(--ink-strong);
+    border-color: var(--ink-muted);
+  }
+
+  /* ── 本文 */
+  .prose {
+    max-width: var(--measure);
+  }
+  .prose > * + * {
+    margin-top: 1.5rem;
+  }
+  .prose h2 {
+    font-size: var(--t-xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.45;
+    color: var(--ink-strong);
+    margin-top: 3rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--rule);
+    font-feature-settings: "palt" 1;
+  }
+  .prose h3 {
+    font-size: var(--t-lg);
+    font-weight: 700;
+    color: var(--ink-strong);
+    margin-top: 2.25rem;
+    font-feature-settings: "palt" 1;
+  }
+  .prose a {
+    color: var(--signal);
+    text-underline-offset: 0.2em;
+  }
+  .prose ul,
+  .prose ol {
+    display: grid;
+    gap: 0.4rem;
+    padding-left: 1.4rem;
+  }
+  .prose ul {
+    list-style: none;
+  }
+  .prose ul > li {
+    position: relative;
+  }
+  .prose ul > li::before {
+    content: "";
+    position: absolute;
+    left: -1.1rem;
+    top: 0.9em;
+    width: 0.4rem;
+    height: 1px;
+    background: var(--signal);
+  }
+  .prose ol {
+    list-style: decimal;
+  }
+  .prose li::marker {
+    font-family: var(--font-mono);
+    color: var(--ink-muted);
+  }
+  .prose blockquote {
+    border-left: 2px solid var(--signal);
+    padding-left: 1.1rem;
+    color: var(--ink-muted);
+  }
+  .prose code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: 0.05em 0.35em;
+  }
+  .prose pre {
+    font-family: var(--font-mono);
+    font-size: var(--t-sm);
+    line-height: 1.7;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--rule);
+    overflow-x: auto;
+    tab-size: 2;
+  }
+  .prose pre code {
+    background: none;
+    border: 0;
+    padding: 0;
+    font-size: inherit;
+  }
+  .prose hr {
+    border: 0;
+    border-top: 1px solid var(--rule);
+    margin-block: 2.5rem;
+  }
+  .prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--t-sm);
+  }
+  .prose th,
+  .prose td {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .prose th {
+    font-family: var(--font-mono);
+    font-size: var(--t-2xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+  }
+
+  /* Shiki のデュアルテーマ切り替え。CSS 変数の差し替えのみで JS なし。 */
+  @media (prefers-color-scheme: dark) {
+    .astro-code,
+    .astro-code span {
+      color: var(--shiki-dark) !important;
+      background-color: var(--shiki-dark-bg) !important;
+      font-style: var(--shiki-dark-font-style) !important;
+      font-weight: var(--shiki-dark-font-weight) !important;
+      text-decoration: var(--shiki-dark-text-decoration) !important;
+    }
+  }
+
+  /* ── フッター */
+  .colophon {
+    padding-block: 2.5rem 3rem;
+    display: grid;
+    gap: 1.25rem;
+  }
+  .colophon__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    font-family: var(--font-mono);
+    font-size: var(--t-2xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .colophon__meta a {
+    text-decoration: none;
+  }
+  .colophon__meta a:hover {
+    color: var(--ink-strong);
+  }
+
+  /* ── スクロール連動の罫線ドロー。JS 0 バイト、コンポジタで動く。 */
+  .draw {
+    position: relative;
+  }
+  .draw::before {
+    content: "";
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    height: 1px;
+    background: var(--rule);
+    transform-origin: left center;
+    animation: draw linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 55%;
+  }
+  @keyframes draw {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────── utilities */
+@layer utilities {
+  /** 和文の読みやすい行長。プロース以外の 1〜2 段落に使う。 */
+  .limit {
+    max-width: 34rem;
+  }
+  .rail--tight {
+    padding-block: 2.25rem;
+  }
+  .rows--flush {
+    border-top: 0;
+  }
+  .follow {
+    margin-top: 1rem;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .skip-link {
+    position: absolute;
+    left: 0.5rem;
+    top: -4rem;
+    background: var(--ink-strong);
+    color: var(--ground);
+    padding: 0.5rem 0.9rem;
+    font-family: var(--font-mono);
+    font-size: var(--t-xs);
+    text-decoration: none;
+    z-index: 20;
+    transition: top 0.15s var(--ease);
+  }
+  .skip-link:focus {
+    top: 0.5rem;
+  }
+}

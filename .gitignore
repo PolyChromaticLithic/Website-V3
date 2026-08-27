@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+.wrangler/
+.DS_Store
+*.log
+
+# Obsidian のワークスペース状態（記事本体は追跡する）
+.obsidian/
+src/content/**/.trash/

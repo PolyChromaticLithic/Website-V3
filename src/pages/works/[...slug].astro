@@ -1,0 +1,42 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+
+export const getStaticPaths = (async () => {
+  const works = await getCollection('works', ({ data }) => !data.draft);
+  return works.map((work) => ({ params: { slug: work.id }, props: { work } }));
+}) satisfies GetStaticPaths;
+
+const { work } = Astro.props;
+const { Content } = await render(work);
+---
+
+<Base title={work.data.title} description={work.data.summary} ogType="article">
+  <article>
+    <header class="shell page-head">
+      <p class="mono muted">{work.data.year} — {work.data.role}</p>
+      <h1 class="h2 hero__title page-head__title">{work.data.title}</h1>
+      <p class="limit follow">{work.data.summary}</p>
+      <p class="row__meta follow">
+        {work.data.stack.map((item) => <span class="tag">{item}</span>)}
+      </p>
+    </header>
+
+    <div class="shell rail draw">
+      <p class="rail__label">Notes</p>
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+
+    <div class="shell rail draw">
+      <p class="rail__label">Links</p>
+      <p class="mono">
+        {work.data.url ? <a href={work.data.url}>Site ↗</a> : <span class="muted">公開サイトなし</span>}
+        {work.data.repo && <span> · <a href={work.data.repo}>Repository ↗</a></span>}
+        <span> · <a href="/works/">← Works</a></span>
+      </p>
+    </div>
+  </article>
+</Base>

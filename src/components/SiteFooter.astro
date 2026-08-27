@@ -1,0 +1,17 @@
+---
+import { SITE } from '../config';
+import SpecStrip from './SpecStrip.astro';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="shell colophon">
+  <SpecStrip variant="compact" />
+  <div class="colophon__meta">
+    <p>© {year} {SITE.name}</p>
+    <p>
+      <a href="/rss.xml">RSS</a> · <a href="/sitemap-index.xml">Sitemap</a>
+    </p>
+    <p>Astro · No JavaScript · No web fonts</p>
+  </div>
+</footer>

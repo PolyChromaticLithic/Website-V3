@@ -1,0 +1,23 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate, isoDate } from '../lib/date';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  showSummary?: boolean;
+}
+const { post, showSummary = true } = Astro.props;
+---
+
+<a class="row" href={`/blog/${post.id}/`}>
+  <time class="row__date" datetime={isoDate(post.data.published)}>
+    {formatDate(post.data.published)}
+  </time>
+  <div>
+    <span class="row__title">{post.data.title}</span>
+    {showSummary && <p class="row__summary">{post.data.summary}</p>}
+  </div>
+  <span class="row__meta">
+    {post.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+  </span>
+</a>

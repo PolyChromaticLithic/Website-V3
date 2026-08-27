@@ -1,0 +1,43 @@
+---
+import { getCollection } from 'astro:content';
+import PostRow from '../../components/PostRow.astro';
+import Base from '../../layouts/Base.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.published.getTime() - a.data.published.getTime(),
+);
+
+const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
+
+/** 年ごとにまとめる。並びが情報になるので、見出しは実際の区切りにだけ置く。 */
+const byYear = posts.reduce<Map<number, typeof posts>>((acc, post) => {
+  const year = post.data.published.getFullYear();
+  acc.set(year, [...(acc.get(year) ?? []), post]);
+  return acc;
+}, new Map());
+---
+
+<Base title="Blog" description="読んだこと、作ったこと、測ったこと。">
+  <section class="shell page-head">
+    <p class="mono muted">Blog</p>
+    <h1 class="display page-head__title">
+      読んだこと、作ったこと、測ったこと。
+    </h1>
+    <p class="row__meta page-head__meta">
+      {tags.map((tag) => <a class="tag" href={`/tags/${tag}/`}>{tag}</a>)}
+    </p>
+  </section>
+
+  {
+    [...byYear.entries()].map(([year, yearPosts]) => (
+      <section class="shell rail rail--tight draw">
+        <h2 class="rail__label">{year}</h2>
+        <div class="rows">
+          {yearPosts.map((post) => (
+            <PostRow post={post} />
+          ))}
+        </div>
+      </section>
+    ))
+  }
+</Base>
