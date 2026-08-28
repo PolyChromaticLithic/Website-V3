@@ -29,10 +29,12 @@ const { tag, posts } = Astro.props;
     <p class="mono muted follow">{posts.length} 件</p>
   </section>
 
-  <section class="shell rail draw">
-    <p class="rail__label">Posts</p>
-    <div class="rows">
-      {posts.map((post) => <PostRow post={post} />)}
-    </div>
-  </section>
+  <div class="shell blocks">
+    <section class="block">
+      <p class="block__label">Posts</p>
+      <div class="rows">
+        {posts.map((post) => <PostRow post={post} />)}
+      </div>
+    </section>
+  </div>
 </Base>

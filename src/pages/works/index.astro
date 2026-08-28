@@ -10,36 +10,55 @@ const works = (await getCollection('works', ({ data }) => !data.draft)).sort(
 <Base title="Works" description="作ったものと、そこで担当したこと。">
   <section class="shell page-head">
     <p class="mono muted">Works</p>
-    <h1 class="display page-head__title">
-      作ったものと、そこで担当したこと。
-    </h1>
+    <h1 class="display page-head__title">作ったものと、そこで担当したこと。</h1>
   </section>
 
-  {
-    works.map((work) => (
-      <section class="shell rail rail--tight draw">
-        <p class="rail__label">
-          {work.data.year}
-          <br />
-          {work.data.role}
-        </p>
-        <div class="stack">
-          <h2 class="h2 row__title">
-            <a href={`/works/${work.id}/`}>{work.data.title}</a>
-          </h2>
-          <p class="limit">{work.data.summary}</p>
-          <p class="row__meta">
-            {work.data.stack.map((item) => (
-              <span class="tag">{item}</span>
-            ))}
+  <div class="shell blocks">
+    {
+      works.length === 0 && (
+        <section class="block">
+          <p class="block__label">Empty</p>
+          <p class="empty">
+            <b>公開できる作品がまだありません</b>
+            手が離れたものから、ここに載せていきます。
           </p>
-          <p class="mono">
-            <a href={`/works/${work.id}/`}>詳細 →</a>
-            {work.data.url && <span> · <a href={work.data.url}>Site ↗</a></span>}
-            {work.data.repo && <span> · <a href={work.data.repo}>Repository ↗</a></span>}
+        </section>
+      )
+    }
+    {
+      works.map((work) => (
+        <section class="block">
+          <p class="block__label">
+            {work.data.year} / {work.data.role}
           </p>
-        </div>
-      </section>
-    ))
-  }
+          <div class="stack">
+            <h2 class="h2">
+              <a href={`/works/${work.id}/`}>{work.data.title}</a>
+            </h2>
+            <p class="limit">{work.data.summary}</p>
+            <p class="row__meta">
+              {work.data.stack.map((item) => (
+                <span class="tag">{item}</span>
+              ))}
+            </p>
+            <p class="mono">
+              <a href={`/works/${work.id}/`}>詳細 →</a>
+              {work.data.url && (
+                <span>
+                  {' · '}
+                  <a href={work.data.url}>Site ↗</a>
+                </span>
+              )}
+              {work.data.repo && (
+                <span>
+                  {' · '}
+                  <a href={work.data.repo}>Repository ↗</a>
+                </span>
+              )}
+            </p>
+          </div>
+        </section>
+      ))
+    }
+  </div>
 </Base>

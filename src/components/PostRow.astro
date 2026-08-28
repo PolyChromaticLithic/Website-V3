@@ -7,12 +7,22 @@ interface Props {
   showSummary?: boolean;
 }
 const { post, showSummary = true } = Astro.props;
+const { published, updated } = post.data;
+/** 更新日は初出と違うときだけ出す。同じ日なら情報が増えない。 */
+const revised = updated && updated.getTime() !== published.getTime() ? updated : null;
 ---
 
 <a class="row" href={`/blog/${post.id}/`}>
-  <time class="row__date" datetime={isoDate(post.data.published)}>
-    {formatDate(post.data.published)}
-  </time>
+  <span class="row__date">
+    <time datetime={isoDate(published)}>{formatDate(published)}</time>
+    {
+      revised && (
+        <time class="row__rev" datetime={isoDate(revised)}>
+          rev {formatDate(revised)}
+        </time>
+      )
+    }
+  </span>
   <div>
     <span class="row__title">{post.data.title}</span>
     {showSummary && <p class="row__summary">{post.data.summary}</p>}

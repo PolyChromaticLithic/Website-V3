@@ -20,52 +20,61 @@ export const getStaticPaths = (async () => {
 
 const { post, newer, older } = Astro.props;
 const { Content } = await render(post);
+
+const { published, updated } = post.data;
+/** 更新日は初出と違うときだけ出す。同じ日なら情報が増えない。 */
+const revised = updated && updated.getTime() !== published.getTime() ? updated : null;
 ---
 
 <Base title={post.data.title} description={post.data.summary} ogType="article">
   <article>
     <header class="shell page-head">
-      <p class="mono muted">
-        <time datetime={isoDate(post.data.published)}>{formatDate(post.data.published)}</time>
+      <p class="mono muted byline">
+        <time datetime={isoDate(published)}>{formatDate(published)}<span>公開</span></time>
         {
-          post.data.updated && (
-            <span> / updated {formatDate(post.data.updated)}</span>
+          revised && (
+            <time class="byline__rev" datetime={isoDate(revised)}>
+              {formatDate(revised)}
+              <span>更新</span>
+            </time>
           )
         }
       </p>
-      <h1 class="h2 hero__title page-head__title">{post.data.title}</h1>
-      <p class="row__meta follow">
+      <h1 class="h2 page-head__title">{post.data.title}</h1>
+      <p class="row__meta page-head__meta">
         {post.data.tags.map((tag) => <a class="tag" href={`/tags/${tag}/`}>{tag}</a>)}
       </p>
     </header>
 
-    <div class="shell rail draw">
-      <p class="rail__label">Text</p>
-      <div class="prose">
-        <Content />
+    <div class="shell blocks">
+      <div class="block">
+        <p class="block__label">Text</p>
+        <div class="prose">
+          <Content />
+        </div>
       </div>
+
+      {
+        (older || newer) && (
+          <nav class="block" aria-label="ほかの記事">
+            <p class="block__label">More</p>
+            <div class="rows">
+              {older && (
+                <a class="row" href={`/blog/${older.id}/`}>
+                  <span class="row__date">← 前の記事</span>
+                  <span class="row__title">{older.data.title}</span>
+                </a>
+              )}
+              {newer && (
+                <a class="row" href={`/blog/${newer.id}/`}>
+                  <span class="row__date">次の記事 →</span>
+                  <span class="row__title">{newer.data.title}</span>
+                </a>
+              )}
+            </div>
+          </nav>
+        )
+      }
     </div>
   </article>
-
-  <nav class="shell rail draw" aria-label="ほかの記事">
-    <p class="rail__label">More</p>
-    <div class="rows rows--flush">
-      {
-        older && (
-          <a class="row" href={`/blog/${older.id}/`}>
-            <span class="row__date">← 前の記事</span>
-            <span class="row__title">{older.data.title}</span>
-          </a>
-        )
-      }
-      {
-        newer && (
-          <a class="row" href={`/blog/${newer.id}/`}>
-            <span class="row__date">次の記事 →</span>
-            <span class="row__title">{newer.data.title}</span>
-          </a>
-        )
-      }
-    </div>
-  </nav>
 </Base>

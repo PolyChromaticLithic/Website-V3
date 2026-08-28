@@ -6,41 +6,41 @@ import Base from '../layouts/Base.astro';
 <Base title="About" description={`${SITE.name} について。`}>
   <section class="shell page-head">
     <p class="mono muted">About</p>
-    <h1 class="display page-head__title">
-      {SITE.name}
-    </h1>
+    <h1 class="display page-head__title">{SITE.name}</h1>
   </section>
 
-  <section class="shell rail draw">
-    <p class="rail__label">Profile</p>
-    <div class="prose">
-      <p>
-        ソフトウェアを書いています。ウェブのフロントエンドと、それを支える小さな道具を作るのが好きです。速さは機能だと思っているので、まず軽くしてから足すようにしています。
-      </p>
-      <p>
-        このサイトは Astro で静的に書き出し、Cloudflare Pages から配信しています。クライアント JavaScript と Web フォントは使っていません。
-      </p>
-    </div>
-  </section>
+  <div class="shell blocks">
+    <section class="block">
+      <p class="block__label">Profile</p>
+      <div class="prose">
+        <p>
+          ソフトウェアを書いています。ウェブのフロントエンドと、それを支える小さな道具を作るのが好きです。速さは機能だと思っているので、まず軽くしてから足すようにしています。
+        </p>
+        <p>
+          このサイトは Astro で静的に書き出し、Cloudflare Pages から配信しています。クライアント JavaScript と Web フォントは使っていません。
+        </p>
+      </div>
+    </section>
 
-  <section class="shell rail draw">
-    <p class="rail__label">Stack</p>
-    <div class="prose">
-      <ul>
-        <li>TypeScript / Astro / Node.js</li>
-        <li>Cloudflare Workers · Pages · D1</li>
-        <li>素の CSS（カスケードレイヤー、コンテナクエリ）</li>
-      </ul>
-    </div>
-  </section>
+    <section class="block">
+      <p class="block__label">Stack</p>
+      <div class="prose">
+        <ul>
+          <li>TypeScript / Astro / Node.js</li>
+          <li>Cloudflare Workers · Pages · D1</li>
+          <li>素の CSS（カスケードレイヤー、コンテナクエリ）</li>
+        </ul>
+      </div>
+    </section>
 
-  <section class="shell rail draw">
-    <p class="rail__label">Contact</p>
-    <div class="prose">
-      <p class="mono">
-        <a href="mailto:hello@example.com">hello@example.com</a><br />
-        <a href="https://github.com/">GitHub ↗</a>
-      </p>
-    </div>
-  </section>
+    <section class="block">
+      <p class="block__label">Contact</p>
+      <div class="prose">
+        <p class="mono">
+          <a href="mailto:hello@example.com">hello@example.com</a><br />
+          <a href="https://github.com/">GitHub ↗</a>
+        </p>
+      </div>
+    </section>
+  </div>
 </Base>

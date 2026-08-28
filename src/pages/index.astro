@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import PostRow from '../components/PostRow.astro';
-import SpecStrip from '../components/SpecStrip.astro';
 import { SITE } from '../config';
 import Base from '../layouts/Base.astro';
 
@@ -16,61 +15,81 @@ const works = (await getCollection('works', ({ data }) => !data.draft)).sort(
 
 <Base>
   <section class="shell hero">
-    <p class="mono muted">{SITE.name} — Software developer</p>
-    <h1 class="display hero__title">軽いものが、<br />いちばん速い。</h1>
+    <p class="mono muted">{SITE.name} / Software developer</p>
+    <h1 class="display hero__title">測ってから、削る。</h1>
     <p class="hero__tagline">
       {/* 和文はソースの改行がそのまま空白になるため、1 文は 1 行で書く。 */}
-      ウェブサイトと道具を作っています。このページは JavaScript を 1 バイトも送らず、Web フォントも読み込みません。下の数字は、いま表示しているこのページをビルド時に実測したものです。
+      ウェブサイトと道具を作っています。このページは JavaScript を 1 バイトも送らず、Web フォントも読み込みません。転送量はビルドのたびに実測し、超えたら通しません。
     </p>
   </section>
 
-  <div class="shell">
-    <SpecStrip />
-  </div>
-
-  <section class="shell rail draw">
-    <h2 class="rail__label">Writing</h2>
-    <div>
-      <div class="rows">
-        {posts.map((post) => <PostRow post={post} />)}
-      </div>
-      <p class="mono muted follow">
-        <a href="/blog/">記事をすべて見る →</a>
-      </p>
-    </div>
-  </section>
-
-  <section class="shell rail draw">
-    <h2 class="rail__label">Works</h2>
-    <div class="rows">
-      {
-        works.map((work) => (
-          <a class="row" href={work.data.url ?? work.data.repo ?? '/works/'}>
-            <span class="row__date">{work.data.year}</span>
-            <div>
-              <span class="row__title">{work.data.title}</span>
-              <p class="row__summary">{work.data.summary}</p>
-            </div>
-            <span class="row__meta">
-              {work.data.stack.map((item) => (
-                <span class="tag">{item}</span>
+  <div class="shell blocks">
+    <section class="block">
+      <h2 class="block__label">Writing</h2>
+      <div>
+        {
+          posts.length > 0 ? (
+            <div class="rows">
+              {posts.map((post) => (
+                <PostRow post={post} />
               ))}
-            </span>
-          </a>
-        ))
-      }
-    </div>
-  </section>
+            </div>
+          ) : (
+            <p class="empty">
+              <b>まだ記事がありません</b>
+              最初の 1 本を書いたらここに並びます。
+            </p>
+          )
+        }
+        {
+          posts.length > 0 && (
+            <p class="mono muted follow">
+              <a href="/blog/">記事をすべて見る →</a>
+            </p>
+          )
+        }
+      </div>
+    </section>
 
-  <section class="shell rail draw">
-    <h2 class="rail__label">Contact</h2>
-    <div class="stack">
-      <p class="lede limit">
-        仕事の相談、書いたものへの指摘、なんでも歓迎します。
-      </p>
-      <p class="mono">
-        <a href="mailto:hello@example.com">hello@example.com</a>
-      </p>
-    </div>
-  </section>
+    <section class="block">
+      <h2 class="block__label">Works</h2>
+      <div>
+        {
+          works.length > 0 ? (
+            <div class="rows">
+              {works.map((work) => (
+                <a class="row" href={`/works/${work.id}/`}>
+                  <span class="row__date">{work.data.year}</span>
+                  <div>
+                    <span class="row__title">{work.data.title}</span>
+                    <p class="row__summary">{work.data.summary}</p>
+                  </div>
+                  <span class="row__meta">
+                    {work.data.stack.map((item) => (
+                      <span class="tag">{item}</span>
+                    ))}
+                  </span>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p class="empty">
+              <b>公開できる作品がまだありません</b>
+              手が離れたものから載せていきます。
+            </p>
+          )
+        }
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 class="block__label">Contact</h2>
+      <div class="stack">
+        <p class="limit">仕事の相談、書いたものへの指摘、なんでも歓迎します。</p>
+        <p class="mono">
+          <a href="mailto:hello@example.com">hello@example.com</a>
+        </p>
+      </div>
+    </section>
+  </div>
 </Base>

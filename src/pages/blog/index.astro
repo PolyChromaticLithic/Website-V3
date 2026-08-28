@@ -20,24 +20,35 @@ const byYear = posts.reduce<Map<number, typeof posts>>((acc, post) => {
 <Base title="Blog" description="読んだこと、作ったこと、測ったこと。">
   <section class="shell page-head">
     <p class="mono muted">Blog</p>
-    <h1 class="display page-head__title">
-      読んだこと、作ったこと、測ったこと。
-    </h1>
+    <h1 class="display page-head__title">読んだこと、作ったこと、測ったこと。</h1>
     <p class="row__meta page-head__meta">
       {tags.map((tag) => <a class="tag" href={`/tags/${tag}/`}>{tag}</a>)}
     </p>
   </section>
 
-  {
-    [...byYear.entries()].map(([year, yearPosts]) => (
-      <section class="shell rail rail--tight draw">
-        <h2 class="rail__label">{year}</h2>
-        <div class="rows">
-          {yearPosts.map((post) => (
-            <PostRow post={post} />
-          ))}
-        </div>
-      </section>
-    ))
-  }
+  <div class="shell blocks">
+    {
+      posts.length === 0 && (
+        <section class="block">
+          <p class="block__label">Empty</p>
+          <p class="empty">
+            <b>まだ記事がありません</b>
+            書いたものはここに、新しい順・年ごとに積まれます。
+          </p>
+        </section>
+      )
+    }
+    {
+      [...byYear.entries()].map(([year, yearPosts]) => (
+        <section class="block">
+          <h2 class="block__label">{year}</h2>
+          <div class="rows">
+            {yearPosts.map((post) => (
+              <PostRow post={post} />
+            ))}
+          </div>
+        </section>
+      ))
+    }
+  </div>
 </Base>

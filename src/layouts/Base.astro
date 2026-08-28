@@ -47,6 +47,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.origin);
 
   <body>
     <a class="skip-link" href="#main">本文へスキップ</a>
+    {/* 背景の面。本文と同じ高さを持ち、中の方眼だけがページの 2 倍速で流れる。 */}
+    <div class="deep" aria-hidden="true"></div>
     <SiteHeader />
     <main id="main">
       <slot />

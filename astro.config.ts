@@ -1,6 +1,7 @@
 import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 import { SITE } from './src/config';
+import { rehypeTableScroll } from './src/lib/rehype-table-scroll';
 
 export default defineConfig({
   site: SITE.origin,
@@ -9,6 +10,8 @@ export default defineConfig({
   compressHTML: true,
   integrations: [sitemap()],
   markdown: {
+    // 表だけは横に伸びうるので、スクロールできる箱に入れてから配る。
+    rehypePlugins: [rehypeTableScroll],
     // Shiki はビルド時に色付き HTML を吐くのでランタイムコストは 0。
     shikiConfig: {
       themes: { light: 'github-light', dark: 'github-dark-default' },

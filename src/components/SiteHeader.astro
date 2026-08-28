@@ -5,17 +5,25 @@ const path = Astro.url.pathname;
 const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
 ---
 
-<header class="masthead">
-  <div class="shell masthead__inner">
-    <a class="masthead__mark" href="/">{SITE.name}</a>
-    <nav class="nav" aria-label="サイト内">
-      {
-        NAV.map((item) => (
-          <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
-            {item.label}
-          </a>
-        ))
-      }
-    </nav>
+<header class="rack">
+  <div class="rack__bar">
+    <a class="rack__mark" href="/">{SITE.name}</a>
+
+    {/* 開閉は details / summary。JS を 1 バイトも足さずにキーボードでも操作できる。 */}
+    <details class="menu">
+      <summary>
+        <span class="menu__glyph"></span>
+        <span class="visually-hidden">メニュー</span>
+      </summary>
+      <nav class="nav" aria-label="サイト内">
+        {
+          NAV.map((item) => (
+            <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+              {item.label}
+            </a>
+          ))
+        }
+      </nav>
+    </details>
   </div>
 </header>

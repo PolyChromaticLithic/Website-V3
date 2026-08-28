@@ -1,51 +1,24 @@
 ---
 /**
- * このサイトのシグネチャ。
+ * このページの読み取り値。
  *
  * 下のプレースホルダは、ビルド後に `scripts/stamp-metrics.mjs` が
  * 出力された HTML そのものを計測して差し替える。トークンは 10 文字固定で、
- * 同じ長さの文字列に置換されるため、表示される「非圧縮バイト数」は
- * 置換後のファイルサイズと 1 バイトの誤差もなく一致する。
+ * 同じ長さの文字列に置換されるため、表示される数値と実ファイルの
+ * サイズは 1 バイトの誤差もなく一致する。
+ *
+ * ゲージやバーは置かない。数字を 3 つだけ、余白のある画面では右端に縦に、
+ * 余白の無い画面ではフッターの隅に置く。出るのはどちらか一方だけ。
  */
-import { SITE } from '../config';
-
-interface Props {
-  variant?: 'hero' | 'compact';
-}
-const { variant = 'hero' } = Astro.props;
-
-const budget = SITE.budgetBrotli.toLocaleString('en-US');
 ---
 
-<section class:list={['spec', variant === 'compact' && 'spec--compact']} aria-labelledby="spec-title">
-  <div class="spec__head">
-    <h2 id="spec-title">
-      {variant === 'hero' ? 'このページの実測値 / measured at build' : 'This page'}
-    </h2>
-    <p>Budget {budget} B brotli</p>
-  </div>
-
-  <dl class="spec__figures">
-    <div>
-      <dt>Transfer</dt>
-      <dd>@@@TRSF@@@ <small>B br</small></dd>
-    </div>
-    <div>
-      <dt>Document</dt>
-      <dd>@@@RAWB@@@ <small>B raw</small></dd>
-    </div>
-    <div>
-      <dt>Script</dt>
-      <dd>0 <small>B</small></dd>
-    </div>
-    <div>
-      <dt>Requests</dt>
-      <dd>@@@REQS@@@</dd>
-    </div>
-  </dl>
-
-  <div class="meter" role="img" aria-label={`転送量は予算 ${budget} バイトに対する使用率で表示されています`}>
-    <div class="meter__fill" style="--ratio:@@@RATO@@@"></div>
-    <div class="meter__ticks"></div>
-  </div>
-</section>
+<p class="sounding">
+  <span class="stamp__i"><b>@@@TRSF@@@</b><small>B brotli</small></span>
+  <span class="stamp__i"><b>0</b><small>B script</small></span>
+  <span class="stamp__i"><b>@@@REQS@@@</b><small>request</small></span>
+</p>
+<p class="stamp">
+  <span class="stamp__i"><b>@@@TRSF@@@</b><small>B brotli</small></span>
+  <span class="stamp__i"><b>0</b><small>B script</small></span>
+  <span class="stamp__i"><b>@@@REQS@@@</b><small>request</small></span>
+</p>

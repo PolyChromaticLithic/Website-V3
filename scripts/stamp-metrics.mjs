@@ -1,5 +1,5 @@
 /**
- * ビルド後に dist/ の HTML を実測し、SpecStrip のプレースホルダを実際の数値に差し替える。
+ * ビルド後に dist/ の HTML を実測し、刻印のプレースホルダを実際の数値に差し替える。
  *
  * 仕掛け：プレースホルダは 10 文字固定で、同じ長さの文字列に置換される。
  * よって「非圧縮バイト数」は置換後のファイルサイズと 1 バイトも違わない。
@@ -19,9 +19,22 @@ const TOKEN_WIDTH = 10;
 const TOKENS = {
   transfer: '@@@TRSF@@@',
   raw: '@@@RAWB@@@',
-  ratio: '@@@RATO@@@',
   requests: '@@@REQS@@@',
 };
+
+/**
+ * 10 文字に詰めるときの、見た目に影響しない詰め方。
+ * HTML では連続する空白・タブ・改行は 1 個の空白に畳まれるので、
+ * どれを選んでも描画は同一。バイト列だけが変わる。
+ *
+ * 下の不動点探索はこの自由度を回して写像をずらし、
+ * 「表示された数値 = 実際の Brotli サイズ」が厳密に成り立つ組み合わせを探す。
+ */
+const FILLS = [' ', '\n', '\t'];
+const PADDINGS = FILLS.flatMap((fill) => [
+  (text) => text.padEnd(TOKEN_WIDTH, fill),
+  (text) => text.padStart(TOKEN_WIDTH, fill),
+]);
 
 const budget = await loadBudget();
 
@@ -43,12 +56,6 @@ async function* walk(dir) {
   }
 }
 
-const pad = (value) => {
-  const text = String(value);
-  if (text.length > TOKEN_WIDTH) throw new Error(`計測値がトークン幅を超えました: ${text}`);
-  return text.padEnd(TOKEN_WIDTH, ' ');
-};
-
 const transferBytes = (html) =>
   brotliCompressSync(Buffer.from(html, 'utf8'), {
     params: { [constants.BROTLI_PARAM_QUALITY]: 11 },
@@ -65,12 +72,16 @@ function countRequests(html) {
   return 1 + patterns.reduce((sum, re) => sum + (html.match(re)?.length ?? 0), 0);
 }
 
-function substitute(html, { transfer, raw, ratio, requests }) {
+function substitute(html, pad, { transfer, raw, requests }) {
+  const put = (value) => {
+    const text = String(value);
+    if (text.length > TOKEN_WIDTH) throw new Error(`計測値がトークン幅を超えました: ${text}`);
+    return pad(text);
+  };
   return html
-    .replaceAll(TOKENS.transfer, pad(transfer.toLocaleString('en-US')))
-    .replaceAll(TOKENS.raw, pad(raw.toLocaleString('en-US')))
-    .replaceAll(TOKENS.ratio, pad(ratio))
-    .replaceAll(TOKENS.requests, pad(requests.toLocaleString('en-US')));
+    .replaceAll(TOKENS.transfer, put(transfer.toLocaleString('en-US')))
+    .replaceAll(TOKENS.raw, put(raw.toLocaleString('en-US')))
+    .replaceAll(TOKENS.requests, put(requests.toLocaleString('en-US')));
 }
 
 const report = [];
@@ -86,20 +97,14 @@ for await (const file of walk(DIST)) {
   // 数字を埋めると中身が変わり、Brotli のサイズも変わる。自己参照なので不動点 f(v) = v を探す。
   //
   // 反復だけでは 2 周期に落ちて不動点を跨いでしまうことがある。そこで
-  // メーターの小数桁数という「表示に影響しない自由度」を回して写像を少しずつずらし、
-  // 厳密に一致する組み合わせを探す。桁数が変わってもバーの見た目は変わらない。
+  // 詰め方（上の PADDINGS）という表示に影響しない自由度を回して写像を少しずつずらし、
+  // 厳密に一致する組み合わせを探す。
   const search = () => {
     let best = null;
 
-    for (const digits of [4, 3, 2, 5]) {
+    for (const pad of PADDINGS) {
       const cache = new Map();
-      const render = (transfer) =>
-        substitute(source, {
-          transfer,
-          raw,
-          requests,
-          ratio: Math.min(transfer / budget, 1).toFixed(digits),
-        });
+      const render = (transfer) => substitute(source, pad, { transfer, raw, requests });
       const probe = (value) => {
         if (!cache.has(value)) cache.set(value, transferBytes(render(value)));
         return cache.get(value);
