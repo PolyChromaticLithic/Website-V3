@@ -4,6 +4,12 @@ export const SITE = {
   tagline: 'ソフトウェアを書きます。速いものが好きです。',
   lang: 'ja',
   locale: 'ja_JP',
+  /**
+   * ヘッダーのアイコン。円形に抜かれるので、正方形で中央に寄せた絵が合う。
+   * public/ に置いたファイルへのパスか、data URI。data URI なら
+   * サブリソースが増えないので 1 ドキュメント = 1 リクエストのまま保てる。
+   */
+  avatar: '/avatar.svg',
   /** 1 ページあたりの転送量（Brotli, byte）の上限。超えたらビルドを落とす。 */
   budgetBrotli: 8 * 1024,
 } as const;

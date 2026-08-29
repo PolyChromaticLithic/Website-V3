@@ -70,6 +70,7 @@
     --horizon: oklch(0.478 0.09 232 / 0.12);
     --glow-a: oklch(0.478 0.09 232 / 0.13);
     --glow-b: oklch(0.44 0.13 264 / 0.1);
+    --glow-c: oklch(0.5 0.1 300 / 0.075);
 
     --font-sans:
       system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
@@ -112,6 +113,7 @@
       --horizon: oklch(0.835 0.088 202 / 0.1);
       --glow-a: oklch(0.835 0.088 202 / 0.12);
       --glow-b: oklch(0.725 0.08 258 / 0.12);
+      --glow-c: oklch(0.7 0.085 305 / 0.1);
     }
   }
 }
@@ -156,10 +158,12 @@
     inset-block-start: 0;
     inset-inline: 0;
     height: 200%;
+    /* 45° に倒した方眼。水平線は縦に動いても動いて見えないが、
+       斜めなら縦の移動が横滑りとして出る。速度差が読めるのはそのため。
+       繰り返しはタイルではなくグラデーション自身に持たせる（継ぎ目が出ない）。 */
     background-image:
-      linear-gradient(90deg, var(--grid) 1px, transparent 1px),
-      linear-gradient(180deg, var(--grid) 1px, transparent 1px);
-    background-size: 72px 72px;
+      repeating-linear-gradient(45deg, var(--grid) 0 1px, transparent 1px 68px),
+      repeating-linear-gradient(-45deg, var(--grid) 0 1px, transparent 1px 68px);
   }
 
   /* ── 方眼を上の一帯にだけ残す覆い。地色そのもので伏せる。
@@ -170,20 +174,27 @@
     inset: 0;
     z-index: -2;
     pointer-events: none;
-    background: radial-gradient(135% 80% at 50% 0%, transparent 6%, var(--ground) 74%);
+    background: radial-gradient(150% 96% at 50% 0%, transparent 10%, var(--ground) 88%);
   }
 
-  /* ── 光。上端から差す 1 枚と、藍のにじみ 2 つ。降りるほど遠ざかり、広がる。 */
+  /* ── 光。上端から差す 1 枚と、藍のにじみ 6 つ。
+     大きさ・濃さ・間隔を揃えず、格子から外して散らす。重なった縁が
+     互いを打ち消し合うので、輪郭のない有機的なむらになる。
+     降りるほど遠ざかり、広がる。 */
   body::after {
     content: "";
     position: fixed;
-    inset: -10%;
+    inset: -12%;
     z-index: -1;
     pointer-events: none;
     background:
       linear-gradient(180deg, var(--horizon) 8%, transparent 46%),
-      radial-gradient(42% 30% at 22% 20%, var(--glow-a), transparent 70%),
-      radial-gradient(46% 32% at 82% 62%, var(--glow-b), transparent 72%);
+      radial-gradient(38% 27% at 16% 11%, var(--glow-a), transparent 68%),
+      radial-gradient(27% 19% at 63% 26%, var(--glow-c), transparent 70%),
+      radial-gradient(48% 31% at 89% 47%, var(--glow-b), transparent 72%),
+      radial-gradient(33% 25% at 31% 58%, var(--glow-a), transparent 70%),
+      radial-gradient(24% 34% at 74% 79%, var(--glow-c), transparent 68%),
+      radial-gradient(41% 26% at 8% 91%, var(--glow-b), transparent 71%);
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -391,9 +402,17 @@
     padding: 0.4rem 0.45rem 0.4rem 1.15rem;
     border: 1px solid var(--rule);
     border-radius: var(--pill);
-    background: color-mix(in oklab, var(--ground) 92%, transparent);
-    backdrop-filter: blur(16px) saturate(180%);
+    /* 塗りが濃いとブラーは掛かっていても見えない。硝子として読ませるには
+       下が透けて見える程度まで薄くする必要がある。 */
+    background: color-mix(in oklab, var(--ground) 68%, transparent);
+    backdrop-filter: blur(20px) saturate(190%);
     box-shadow: 0 14px 34px -24px oklch(0 0 0 / 0.7);
+  }
+  /* ブラーが無い環境では透けたままになるので、塗りで代わりに伏せる。 */
+  @supports not (backdrop-filter: blur(1px)) {
+    .rack__bar {
+      background: color-mix(in oklab, var(--ground) 94%, transparent);
+    }
   }
   /* 動きを許す環境でだけ、最上部の枠と塗りを消しておく。
      動かない環境では「現れたあと」の見た目が既定になる。 */
@@ -411,7 +430,12 @@
       box-shadow: 0 0 0 0 transparent;
     }
   }
+  /* 角括弧は「マークが無い」ことの代わりだった。実物のアイコンが入るなら
+     役目は終わりなので外す（戻すなら ::before / ::after を足すだけ）。 */
   .rack__mark {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-family: var(--font-mono);
     font-size: var(--t-sm);
     font-weight: 700;
@@ -420,15 +444,16 @@
     color: var(--ink-strong);
     white-space: nowrap;
   }
-  .rack__mark::before {
-    content: "[";
-    color: var(--accent);
-    margin-inline-end: 0.4rem;
-  }
-  .rack__mark::after {
-    content: "]";
-    color: var(--accent);
-    margin-inline-start: 0.4rem;
+  /* 正方形でない画像が来ても中央を正円に抜く。読み込まれるまでの間も
+     枠だけは同じ大きさで出るので、名前の位置がずれない。 */
+  .rack__face {
+    width: 1.6rem;
+    height: 1.6rem;
+    flex: none;
+    border-radius: 50%;
+    object-fit: cover;
+    background: color-mix(in oklab, var(--accent) 18%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 32%, transparent);
   }
 
   /* ── ナビゲーション。details だけで開閉するので JS は 0 バイト。 */
@@ -663,9 +688,11 @@
   .row {
     display: grid;
     gap: 0.15rem 1.25rem;
-    padding: 0.85rem 0.65rem;
+    /* 左だけ深く取る。hover と focus でここに 2px の罫が立つので、
+       余白が浅いと日付が罫にぶつかって見える。 */
+    padding: 0.85rem 0.8rem 0.85rem 1.2rem;
     /* hover で余白を変えない。行が動くと読んでいた場所を見失う。 */
-    margin-inline: -0.65rem;
+    margin-inline: -0.8rem;
     border-radius: 3px;
     text-decoration: none;
     transition:
