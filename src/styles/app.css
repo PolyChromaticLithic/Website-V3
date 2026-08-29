@@ -174,7 +174,11 @@
     inset: 0;
     z-index: -2;
     pointer-events: none;
-    background: radial-gradient(150% 96% at 50% 0%, transparent 10%, var(--ground) 88%);
+    /* 上下の両端から伏せて、方眼を中ほどの帯にだけ残す。
+       上を空けておくとヘッダーの真下で線が途切れて見えるので、そこも閉じる。 */
+    background:
+      linear-gradient(180deg, var(--ground) 2%, transparent 30%),
+      radial-gradient(150% 96% at 50% 0%, transparent 10%, var(--ground) 88%);
   }
 
   /* ── 光。上端から差す 1 枚と、藍のにじみ 6 つ。
@@ -389,9 +393,12 @@
     inset-inline: 0;
     z-index: 20;
     padding: 0.6rem var(--gap) 0;
-    view-transition-name: rack;
   }
   .rack__bar {
+    /* 遷移の名前は外側ではなくこの板に付ける。view-transition-name を持つ要素は
+       backdrop root になるので、.rack に付けると中の backdrop-filter が
+       自分の内側しか写さない。掛かってはいるのに効いていないように見えるのはこれ。 */
+    view-transition-name: rack;
     position: relative;
     max-width: var(--shell);
     margin-inline: auto;
@@ -428,6 +435,9 @@
       border-color: transparent;
       background-color: transparent;
       box-shadow: 0 0 0 0 transparent;
+      /* フィルタも一緒に消す。塗りが無くても saturate だけ効いていると、
+         最上部で板の輪郭が色の差として出てしまう。 */
+      backdrop-filter: blur(0) saturate(100%);
     }
   }
   /* 角括弧は「マークが無い」ことの代わりだった。実物のアイコンが入るなら
