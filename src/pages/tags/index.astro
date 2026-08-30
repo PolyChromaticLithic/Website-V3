@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const posts = await getCollection('blog', ({ data }) => !data.draft);
+
+/**
+ * タグと、それが付いた記事の数。
+ *
+ * 多い順に並べる。同数のときは名前順にして、記事を 1 本足しただけで
+ * 並びが入れ替わらないようにする。
+ */
+const tags = [
+  ...posts.reduce<Map<string, number>>((acc, post) => {
+    for (const tag of post.data.tags) acc.set(tag, (acc.get(tag) ?? 0) + 1);
+    return acc;
+  }, new Map()),
+].sort(([nameA, countA], [nameB, countB]) => countB - countA || nameA.localeCompare(nameB));
+---
+
+<Base title="Tags" description="記事に付いたタグの一覧。">
+  <section class="shell page-head">
+    <p class="mono muted">Tags</p>
+    <h1 class="display page-head__title">タグ</h1>
+    <p class="mono muted follow">{tags.length} 種 / {posts.length} 件</p>
+  </section>
+
+  <div class="shell blocks">
+    <section class="block">
+      <p class="block__label">Tags</p>
+      {
+        tags.length === 0 ? (
+          <p class="empty">
+            <b>まだタグがありません</b>
+            記事の frontmatter に tags を書くと、ここに並びます。
+          </p>
+        ) : (
+          <div class="rows">
+            {tags.map(([name, count]) => (
+              <a class="row" href={`/tags/${name}/`}>
+                <span class="row__date">{count} 件</span>
+                <div>
+                  <span class="row__title">{name}</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        )
+      }
+    </section>
+  </div>
+</Base>

@@ -15,14 +15,15 @@ export interface Crumb {
 /**
  * 第 1 段の表記。ここに無いパスは slug から作った文字で出る。
  *
- * `index: false` は「その階層に一覧ページが無い」印。/tags/ は個別のタグページ
- * しか持たないので、リンクにすると自分で 404 へ送ることになる。
+ * `index: false` は「その階層に一覧ページが無い」印。そこをリンクにすると
+ * 自分で 404 へ送ることになるので、ただの文字として置く。
  */
 const SECTIONS: Record<string, { label: string; index: boolean }> = {
   works: { label: 'Works', index: true },
   blog: { label: 'Blog', index: true },
   about: { label: 'About', index: true },
-  tags: { label: 'Tags', index: false },
+  tags: { label: 'Tags', index: true },
+  sitemap: { label: 'Sitemap', index: true },
 };
 
 /** byte-budget → Byte Budget。slug を生で出すとその段だけ書体が崩れる。 */

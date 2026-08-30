@@ -1,0 +1,104 @@
+---
+import { getCollection } from 'astro:content';
+import PostRow from '../../components/PostRow.astro';
+import { NAV } from '../../config';
+import Base from '../../layouts/Base.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.published.getTime() - a.data.published.getTime(),
+);
+const works = (await getCollection('works', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order || b.data.year - a.data.year,
+);
+const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
+
+/**
+ * 節の入口。ヘッダーの NAV と同じ並びに、そこには置いていない 2 枚を足す。
+ * NAV を直に読むので、行き先が増えてもここを書き直さなくてよい。
+ */
+const entries = [
+  ...NAV,
+  { href: '/tags/', label: 'Tags' },
+  { href: '/sitemap/', label: 'Sitemap' },
+];
+
+/** 配っている HTML の枚数。404 は URL を持たないので数に入れない。 */
+const total = entries.length + works.length + posts.length + tags.length;
+---
+
+<Base title="Sitemap" description="このサイトの全ページの一覧。">
+  <section class="shell page-head">
+    <p class="mono muted">Sitemap</p>
+    <h1 class="display page-head__title">サイトマップ</h1>
+    <p class="mono muted follow">{total} ページ</p>
+  </section>
+
+  <div class="shell blocks">
+    <section class="block">
+      <p class="block__label">Pages</p>
+      <div class="rows">
+        {
+          entries.map((entry) => (
+            <a class="row" href={entry.href}>
+              <span class="row__date">{entry.href}</span>
+              <div>
+                <span class="row__title">{entry.label}</span>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="block">
+      <p class="block__label">Works</p>
+      <div class="rows">
+        {
+          works.map((work) => (
+            <a class="row" href={`/works/${work.id}/`}>
+              <span class="row__date">{work.data.year}</span>
+              <div>
+                <span class="row__title">{work.data.title}</span>
+              </div>
+              <span class="row__meta">
+                {work.data.stack.map((item) => (
+                  <span class="tag">{item}</span>
+                ))}
+              </span>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="block">
+      <p class="block__label">Blog</p>
+      {/* 一覧としては題名と日付だけで足りる。要約は記事側と /blog/ に置いてある。 */}
+      <div class="rows">
+        {posts.map((post) => <PostRow post={post} showSummary={false} />)}
+      </div>
+    </section>
+
+    <section class="block">
+      <p class="block__label">Tags</p>
+      <p class="row__meta">
+        {tags.map((tag) => <a class="tag" href={`/tags/${tag}/`}>{tag}</a>)}
+      </p>
+    </section>
+
+    <section class="block">
+      <p class="block__label">Machine readable</p>
+      {/*
+        どちらもビルドの成果物。sitemap-index.xml は @astrojs/sitemap が
+        `astro build` のときにだけ書き出すので、`astro dev` では 404 になる。
+        人が読む一覧はこのページの方で、下の 2 つはクローラ向け。
+      */}
+      <div class="stack stack--tight">
+        <p class="mono"><a href="/rss.xml">/rss.xml</a> — 記事の更新を配る RSS</p>
+        <p class="mono">
+          <a href="/sitemap-index.xml">/sitemap-index.xml</a> — robots.txt が指す XML サイトマップ
+        </p>
+      </div>
+    </section>
+  </div>
+</Base>
