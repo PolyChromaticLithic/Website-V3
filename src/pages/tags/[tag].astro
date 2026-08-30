@@ -20,9 +20,12 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { tag, posts } = Astro.props;
+
+/* パンくずの末尾はタグ名をそのまま出す。slug からの既定は語頭を大文字にするので、
+   css が Css になって別の語に見えてしまう。 */
 ---
 
-<Base title={`${tag} の記事`} description={`${tag} タグの付いた記事の一覧。`}>
+<Base title={`${tag} の記事`} description={`${tag} タグの付いた記事の一覧。`} crumb={tag}>
   <section class="shell page-head">
     <p class="mono muted">Tag</p>
     <h1 class="display page-head__title">{tag}</h1>

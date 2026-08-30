@@ -1,6 +1,8 @@
 export const SITE = {
   origin: "https://polychromaticlithic.com",
   name: "Astarの素敵なホームページ V3",
+  /** 説明を持たないページの description と、RSS の説明に使う 1 文。 */
+  tagline: "UnityとかC#とかをやってます",
   lang: "ja",
   locale: "ja_JP",
   /**

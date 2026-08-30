@@ -470,7 +470,69 @@
     box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 32%, transparent);
   }
 
+  /* ── 現在地（パンくず）。アイコンから今いる段までを 1 本の道として並べる。
+     長くなるのは末尾だけなので、縮むのも省略されるのも末尾だけにする。 */
+  .trail,
+  .trail__list,
+  .trail__step {
+    /* flex の子は既定で内容より小さくならない。この 0 が無いと、記事名が
+       長いときに板ごと押し広げられてメニューが外へ出る。 */
+    min-width: 0;
+  }
+  .trail__list,
+  .trail__step {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  /* 区切りは段の中身ではなく境目なので、要素ではなく擬似要素で置く。
+     読み上げの列にも出ない。 */
+  .trail__step + .trail__step::before {
+    content: ">";
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: var(--t-sm);
+    line-height: 1;
+    color: color-mix(in oklab, var(--ink-muted) 60%, transparent);
+  }
+  /* アイコンと途中の段は短いので縮ませない。 */
+  .trail__step:not(:last-child) {
+    flex: none;
+  }
+  .trail__link {
+    font-family: var(--font-mono);
+    font-size: var(--t-sm);
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    color: var(--ink-muted);
+    white-space: nowrap;
+    transition: color 0.16s var(--ease);
+  }
+  a.trail__link:hover {
+    color: var(--ink-strong);
+  }
+  /* 行き先を持たない段（一覧ページの無い Tags、404 の ??）。押せる段と同じ色だと
+     押しても何も起きない字になるので、一段落としてリンクでないことを見せる。 */
+  span.trail__link {
+    color: color-mix(in oklab, var(--ink-muted) 72%, transparent);
+  }
+  /* 今いる段。行き先が自分自身なので、色と太さだけで「ここ」と分かるようにする。 */
+  .trail__link[aria-current="page"] {
+    color: var(--ink-strong);
+    font-weight: 700;
+  }
+  /* 記事名が入るのは末尾だけ。板が足りなくなったらここを削って三点に畳む。 */
+  .trail__step:last-child .trail__link {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   /* ── ナビゲーション。details だけで開閉するので JS は 0 バイト。 */
+  /* 道が伸びてもメニューは縮ませない。畳むのは道の側の仕事。 */
+  .menu {
+    flex: none;
+  }
   .menu > summary {
     display: none;
   }

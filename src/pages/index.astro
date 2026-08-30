@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import PostRow from '../components/PostRow.astro';
-import { SITE } from '../config';
 import Base from '../layouts/Base.astro';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft))

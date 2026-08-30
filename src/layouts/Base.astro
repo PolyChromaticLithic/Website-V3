@@ -8,9 +8,23 @@ interface Props {
   title?: string | undefined;
   description?: string | undefined;
   ogType?: 'website' | 'article';
+  /**
+   * ヘッダーの現在地表示の末尾に出す文字。省くと URL の slug から作る
+   * （/blog/byte-budget/ なら Byte Budget）。見出しが長い記事では
+   * 題名をそのまま入れると板から溢れるので、既定のままが読みやすい。
+   */
+  crumb?: string | undefined;
+  /** 404 のように行き先の分からないページ。現在地を ?? 1 段だけにする。 */
+  notFound?: boolean | undefined;
 }
 
-const { title, description = SITE.tagline, ogType = 'website' } = Astro.props;
+const {
+  title,
+  description = SITE.tagline,
+  ogType = 'website',
+  crumb,
+  notFound = false,
+} = Astro.props;
 const pageTitle = title ? `${title} — ${SITE.name}` : `${SITE.name} — ${SITE.tagline}`;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.origin);
 ---
@@ -49,7 +63,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.origin);
     <a class="skip-link" href="#main">本文へスキップ</a>
     {/* 背景の面。本文と同じ高さを持ち、中の方眼だけがページの 2 倍速で流れる。 */}
     <div class="deep" aria-hidden="true"></div>
-    <SiteHeader />
+    <SiteHeader crumb={crumb} notFound={notFound} />
     <main id="main">
       <slot />
     </main>
