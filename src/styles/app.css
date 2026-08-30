@@ -414,34 +414,46 @@
     border: 1px solid var(--rule);
     border-radius: var(--pill);
     /* 塗りが濃いとブラーは掛かっていても見えない。硝子として読ませるには
-       下が透けて見える程度まで薄くする必要がある。 */
-    background: color-mix(in oklab, var(--ground) 68%, transparent);
+       下が透けて見える程度まで薄くする必要がある。
+       現れたあとの姿は変数に持たせる。キーフレームの終点から参照するため。 */
+    --bar-fill: color-mix(in oklab, var(--ground) 68%, transparent);
+    background: var(--bar-fill);
     backdrop-filter: blur(20px) saturate(190%);
     box-shadow: 0 14px 34px -24px oklch(0 0 0 / 0.7);
   }
   /* ブラーが無い環境では透けたままになるので、塗りで代わりに伏せる。 */
   @supports not (backdrop-filter: blur(1px)) {
     .rack__bar {
-      background: color-mix(in oklab, var(--ground) 94%, transparent);
+      --bar-fill: color-mix(in oklab, var(--ground) 94%, transparent);
     }
   }
-  /* 動きを許す環境でだけ、最上部の枠と塗りを消しておく。
-     動かない環境では「現れたあと」の見た目が既定になる。 */
+  /* 動きを許す環境でだけ、最上部を透明にしておき、スクロールで硝子を呼ぶ。
+     向きはこちらでなければならない。ルートにスクロールできる余地が無いと
+     scroll() のタイムラインは無効になり、アニメーションごと効かなくなって
+     素の宣言＝硝子に戻ってしまうため（1 画面で収まるページがそれ）。
+     透明を素にしておけば、その「効かない」状態がそのまま最上部の姿になる。
+     動きを許さない環境では、引き続き「現れたあと」が既定。 */
   @media (prefers-reduced-motion: no-preference) {
-    .rack__bar {
-      animation: bar-settle linear both;
-      animation-timeline: scroll(root block);
-      animation-range: 0 180px;
+    @supports (animation-timeline: scroll()) {
+      .rack__bar {
+        border-color: transparent;
+        background-color: transparent;
+        box-shadow: 0 0 0 0 transparent;
+        /* フィルタも一緒に消す。塗りが無くても saturate だけ効いていると、
+           最上部で板の輪郭が色の差として出てしまう。 */
+        backdrop-filter: blur(0) saturate(100%);
+        animation: bar-settle linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0 180px;
+      }
     }
   }
   @keyframes bar-settle {
-    from {
-      border-color: transparent;
-      background-color: transparent;
-      box-shadow: 0 0 0 0 transparent;
-      /* フィルタも一緒に消す。塗りが無くても saturate だけ効いていると、
-         最上部で板の輪郭が色の差として出てしまう。 */
-      backdrop-filter: blur(0) saturate(100%);
+    to {
+      border-color: var(--rule);
+      background-color: var(--bar-fill);
+      box-shadow: 0 14px 34px -24px oklch(0 0 0 / 0.7);
+      backdrop-filter: blur(20px) saturate(190%);
     }
   }
   /* 角括弧は「マークが無い」ことの代わりだった。実物のアイコンが入るなら
