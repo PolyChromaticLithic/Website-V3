@@ -8,3 +8,6 @@ dist/
 # Obsidian のワークスペース状態（記事本体は追跡する）
 .obsidian/
 src/content/**/.trash/
+
+# Claude Code の git worktree（サブモジュール扱いされるとデプロイが壊れる）
+.claude/worktrees/
