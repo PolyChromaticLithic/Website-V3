@@ -15,11 +15,10 @@ const works = (await getCollection('works', ({ data }) => !data.draft)).sort(
 
 <Base>
   <section class="shell hero">
-    <p class="mono muted">{SITE.name} / Software developer</p>
-    <h1 class="display hero__title">測ってから、削る。</h1>
+    <p class="mono muted">Index</p>
+    <h1 class="display hero__title">Astarの素敵なホームページ V3</h1>
     <p class="hero__tagline">
-      {/* 和文はソースの改行がそのまま空白になるため、1 文は 1 行で書く。 */}
-      ウェブサイトと道具を作っています。このページは JavaScript を 1 バイトも送らず、Web フォントも読み込みません。転送量はビルドのたびに実測し、超えたら通しません。
+      UnityとかC#とかをやってます
     </p>
   </section>
 
@@ -37,7 +36,6 @@ const works = (await getCollection('works', ({ data }) => !data.draft)).sort(
           ) : (
             <p class="empty">
               <b>まだ記事がありません</b>
-              最初の 1 本を書いたらここに並びます。
             </p>
           )
         }
@@ -75,7 +73,6 @@ const works = (await getCollection('works', ({ data }) => !data.draft)).sort(
           ) : (
             <p class="empty">
               <b>公開できる作品がまだありません</b>
-              手が離れたものから載せていきます。
             </p>
           )
         }
@@ -85,9 +82,15 @@ const works = (await getCollection('works', ({ data }) => !data.draft)).sort(
     <section class="block">
       <h2 class="block__label">Contact</h2>
       <div class="stack">
-        <p class="limit">仕事の相談、書いたものへの指摘、なんでも歓迎します。</p>
+        <p class="limit">ご連絡は以下までお願いします。</p>
         <p class="mono">
-          <a href="mailto:hello@example.com">hello@example.com</a>
+          <a href="mailto:polychromaticlithic@outlook.jp">polychromaticlithic@outlook.jp</a>
+        </p>
+        <p class="limit">その他ソーシャルメディア：</p>
+        <p class="mono">
+          <a href="https://twitter.com/PolyChromaticLi" target="_blank" rel="noopener noreferrer">Twitter</a>
+          <a href="https://github.com/PolyChromaticLithic" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://misskey.io/@As6" target="_blank" rel="noopener noreferrer">Misskey</a>
         </p>
       </div>
     </section>

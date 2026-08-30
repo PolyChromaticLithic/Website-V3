@@ -7,10 +7,10 @@ const works = (await getCollection('works', ({ data }) => !data.draft)).sort(
 );
 ---
 
-<Base title="Works" description="作ったものと、そこで担当したこと。">
+<Base title="Works" description="作品集">
   <section class="shell page-head">
     <p class="mono muted">Works</p>
-    <h1 class="display page-head__title">作ったものと、そこで担当したこと。</h1>
+    <h1 class="display page-head__title">作品集</h1>
   </section>
 
   <div class="shell blocks">
@@ -20,7 +20,7 @@ const works = (await getCollection('works', ({ data }) => !data.draft)).sort(
           <p class="block__label">Empty</p>
           <p class="empty">
             <b>公開できる作品がまだありません</b>
-            手が離れたものから、ここに載せていきます。
+            残念……
           </p>
         </section>
       )

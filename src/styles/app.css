@@ -73,11 +73,11 @@
     --glow-c: oklch(0.5 0.1 300 / 0.075);
 
     --font-sans:
-      system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
-      "Yu Gothic", Meiryo, sans-serif;
+      system-ui, -apple-system, "Segoe UI", "Hiragino Sans",
+      "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
     --font-mono:
-      ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas, "Noto Sans Mono", "Yu Gothic",
-      monospace;
+      ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas,
+      "Noto Sans Mono", "Yu Gothic", monospace;
 
     --t-2xs: 0.6875rem;
     --t-xs: 0.75rem;
@@ -344,6 +344,10 @@
     display: grid;
     gap: var(--flow, 1.1rem);
   }
+  /* 説明とその値のように、離すと関係が切れて見える 2 行に使う。 */
+  .stack--tight {
+    --flow: 0.45rem;
+  }
 }
 
 /* ─────────────────────────────────────────────── components */
@@ -494,7 +498,8 @@
   .nav a[aria-current="page"] {
     color: var(--ink-strong);
     background: var(--accent-wash);
-    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 40%, transparent);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in oklab, var(--accent) 40%, transparent);
   }
 
   @media (width < 44rem) {
@@ -797,6 +802,63 @@
   a.tag:hover {
     color: var(--accent);
     border-color: var(--accent);
+  }
+
+  /* ── 段に分けた一覧。技術スタックのように短い語が続くものを、縦に伸ばさず
+     版面の幅いっぱいに敷く。段の名前と中身は寄せ、段と段の間だけ空ける。
+     余白の差だけで、どの語がどの段のものか読み取れる。 */
+  .tiers {
+    display: grid;
+    gap: 1.55rem;
+  }
+  .tier {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .tier__name {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-family: var(--font-mono);
+    font-size: var(--t-sm);
+    letter-spacing: 0.12em;
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  /* 名前の後ろに罫を伸ばして、その段の受け持つ範囲を示す。 */
+  .tier__name::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--rule-soft);
+  }
+  /* 列幅は決め打ちにせず、入る分だけ列を作る。狭い画面では 2 列に落ちる。 */
+  .tier__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+    gap: 0.25rem 1rem;
+    font-family: var(--font-mono);
+    font-size: var(--t-sm);
+    letter-spacing: 0.02em;
+  }
+  .tier__list > li {
+    position: relative;
+    padding-inline-start: 1rem;
+    line-height: 1.9;
+    overflow-wrap: anywhere;
+  }
+  .tier__list > li::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0.72em;
+    width: 0.35rem;
+    height: 0.35rem;
+    border: 1px solid var(--accent);
+  }
+  /* 得意な段だけ印を塗る。段の順位を、言葉を足さずに示す。 */
+  .tier--core .tier__list > li::before {
+    background: var(--accent);
   }
 
   /* ── 何も無いときの表示。無いことを、次の一手と一緒に言う。 */

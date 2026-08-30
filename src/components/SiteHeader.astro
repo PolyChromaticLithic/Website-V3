@@ -12,18 +12,17 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWi
         アイコンは唯一の外部サブリソース。読み込みが 1 つ増えるので、
         読み取り値の request も 1 → 2 になる。1 に戻したいときは画像を
         data URI にして config の avatar に直接書く（README を見る）。
-        alt は空。すぐ右に同じ意味のサイト名が出るので、読み上げは重複させない。
       */}
       <img
         class="rack__face"
         src={SITE.avatar}
         width="32"
         height="32"
-        alt=""
+        alt="Home"
         decoding="async"
         fetchpriority="high"
       />
-      <span>{SITE.name}</span>
+      <!-- <span>{SITE.name}</span> -->
     </a>
 
     {/* 開閉は details / summary。JS を 1 バイトも足さずにキーボードでも操作できる。 */}

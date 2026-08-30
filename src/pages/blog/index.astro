@@ -17,10 +17,10 @@ const byYear = posts.reduce<Map<number, typeof posts>>((acc, post) => {
 }, new Map());
 ---
 
-<Base title="Blog" description="読んだこと、作ったこと、測ったこと。">
+<Base title="Blog" description="Astarの雑記">
   <section class="shell page-head">
     <p class="mono muted">Blog</p>
-    <h1 class="display page-head__title">読んだこと、作ったこと、測ったこと。</h1>
+    <h1 class="display page-head__title">Astarの雑記</h1>
     <p class="row__meta page-head__meta">
       {tags.map((tag) => <a class="tag" href={`/tags/${tag}/`}>{tag}</a>)}
     </p>
@@ -33,7 +33,7 @@ const byYear = posts.reduce<Map<number, typeof posts>>((acc, post) => {
           <p class="block__label">Empty</p>
           <p class="empty">
             <b>まだ記事がありません</b>
-            書いたものはここに、新しい順・年ごとに積まれます。
+            テスト 
           </p>
         </section>
       )
