@@ -1,29 +1,66 @@
 ---
 import { NAV, SITE } from '../config';
+import { crumbsFor, UNKNOWN_TRAIL } from '../lib/crumbs';
+
+interface Props {
+  /** パンくずの末尾に出す文字。省くと URL の slug から作る。 */
+  crumb?: string | undefined;
+  /** 404 のように行き先の分からないページ。道を ?? 1 段だけにする。 */
+  notFound?: boolean | undefined;
+}
+
+const { crumb, notFound = false } = Astro.props;
 
 const path = Astro.url.pathname;
 const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+
+/* ルートでは空になる。そのときアイコンだけが残る。 */
+const trail = notFound ? UNKNOWN_TRAIL : crumbsFor(path, crumb);
 ---
 
 <header class="rack">
   <div class="rack__bar">
-    <a class="rack__mark" href="/">
-      {/*
-        アイコンは唯一の外部サブリソース。読み込みが 1 つ増えるので、
-        読み取り値の request も 1 → 2 になる。1 に戻したいときは画像を
-        data URI にして config の avatar に直接書く（README を見る）。
-      */}
-      <img
-        class="rack__face"
-        src={SITE.avatar}
-        width="32"
-        height="32"
-        alt="Home"
-        decoding="async"
-        fetchpriority="high"
-      />
-      <!-- <span>{SITE.name}</span> -->
-    </a>
+    {/* アイコンから現在地までを 1 本の道として並べる。区切りの > は
+        境目であって中身ではないので、CSS の擬似要素で置いて読み上げには出さない。 */}
+    <nav class="trail" aria-label="現在地">
+      <ol class="trail__list">
+        <li class="trail__step">
+          <a class="rack__mark" href="/" aria-current={path === '/' ? 'page' : undefined}>
+            {/*
+              アイコンは唯一の外部サブリソース。読み込みが 1 つ増えるので、
+              読み取り値の request も 1 → 2 になる。1 に戻したいときは画像を
+              data URI にして config の avatar に直接書く（README を見る）。
+            */}
+            <img
+              class="rack__face"
+              src={SITE.avatar}
+              width="32"
+              height="32"
+              alt="Home"
+              decoding="async"
+              fetchpriority="high"
+            />
+          </a>
+        </li>
+        {
+          trail.map((step, i) => (
+            <li class="trail__step">
+              {step.href ? (
+                <a
+                  class="trail__link"
+                  href={step.href}
+                  aria-current={i === trail.length - 1 ? 'page' : undefined}
+                >
+                  {step.label}
+                </a>
+              ) : (
+                <span class="trail__link">{step.label}</span>
+              )}
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
 
     {/* 開閉は details / summary。JS を 1 バイトも足さずにキーボードでも操作できる。 */}
     <details class="menu">
