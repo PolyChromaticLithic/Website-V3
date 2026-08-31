@@ -33,6 +33,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.origin);
 <html lang={SITE.lang}>
   <head>
     <meta charset="utf-8" />
+    {/* 配色の指定はスタイルシートより前に置く。ブラウザが遷移中に塗る素の
+        キャンバスの色はこの値で決まるので、CSS の中だけに書いていると、
+        先読みが間に合わなかったときに白が一瞬出る。 */}
+    <meta name="color-scheme" content="light dark" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
@@ -46,10 +50,19 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.origin);
     <meta property="og:locale" content={SITE.locale} />
     <meta name="twitter:card" content="summary" />
 
-    {/* ホバー時に次ページを先読みする。実行 JS ではなく宣言的なヒント。 */}
+    {/* ホバー時に次ページを先読みする。実行 JS ではなく宣言的なヒント。
+        prerender は同時に持てる数に上限があり、省電力や省メモリ、データセーバーの
+        下では丸ごと無効になる。落ちたときの受け皿として prefetch も並べておく。
+        1 ドキュメント = 1 リクエストなので、HTML さえ手元にあれば描画はすぐ始まる。 */}
     <script type="speculationrules" is:inline>
       {
         "prerender": [
+          {
+            "where": { "href_matches": "/*" },
+            "eagerness": "moderate"
+          }
+        ],
+        "prefetch": [
           {
             "where": { "href_matches": "/*" },
             "eagerness": "moderate"
