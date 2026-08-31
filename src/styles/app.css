@@ -89,7 +89,11 @@
 
     --shell: 66rem;
     --measure: 38rem;
-    --gap: clamp(1rem, 3.6vw, 1.75rem);
+    /* 版面の左右。ヘッダーの中身もこの線に合わせる（.rack__bar を見る）。 */
+    --gap: clamp(1.5rem, 3.6vw, 1.75rem);
+    /* ヘッダーの板を縁から浮かせる幅。狭い画面では画面の縁から、広い画面では
+       版面の箱の縁から、同じだけ内側に来る。板は版面の線より外に出る。 */
+    --rack-inset: 0.5rem;
     --dock: 3.75rem;
     --tick: 0.625rem;
     --pill: 999px;
@@ -400,7 +404,7 @@
     inset-block-start: 0;
     inset-inline: 0;
     z-index: 20;
-    padding: 0.6rem var(--gap) 0;
+    padding: 0.6rem var(--rack-inset) 0;
   }
   .rack__bar {
     /* 遷移の名前は外側ではなくこの板に付ける。view-transition-name を持つ要素は
@@ -408,13 +412,26 @@
        自分の内側しか写さない。掛かってはいるのに効いていないように見えるのはこれ。 */
     view-transition-name: rack;
     position: relative;
-    max-width: var(--shell);
+    /* 上限も同じだけ縮めておく。こうすると板の縁は、狭い画面では画面の縁から、
+       広い画面では版面の箱の縁から、どちらも --rack-inset だけ内側に来る。
+       板の縁から版面の線までがどの幅でも同じ長さになり、内側の余白を
+       1 つの式で決められる。 */
+    max-width: calc(var(--shell) - 2 * var(--rack-inset));
     margin-inline: auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 0.4rem 0.45rem 0.4rem 1.15rem;
+    padding-block: 0.4rem;
+    /* 中身が版面の線に乗るように内側の余白を決める。
+       版面までの距離 = 板の浮き + 枠線 + この余白、なので残りがこれ。
+       最上部では硝子が消えて縁が見えなくなるが、中身は動かないまま
+       本文と同じ線に並ぶ。
+       右端は押せる大きさのぶん、中身が自分の内側に余白を持っている
+       （ボタンは 2.3rem の中の 1rem のグリフ、リンクは 0.75rem）。
+       そろえるのは箱の縁ではなく線の側なので、その半端 0.7rem を引く。 */
+    padding-inline: calc(var(--gap) - var(--rack-inset) - 1px)
+      calc(var(--gap) - var(--rack-inset) - 1px - 0.7rem);
     border: 1px solid var(--rule);
     border-radius: var(--pill);
     /* 塗りが濃いとブラーは掛かっていても見えない。硝子として読ませるには
