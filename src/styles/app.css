@@ -73,11 +73,11 @@
     --glow-c: oklch(0.5 0.1 300 / 0.075);
 
     --font-sans:
-      system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
-      "Yu Gothic", Meiryo, sans-serif;
+      system-ui, -apple-system, "Segoe UI", "Hiragino Sans",
+      "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
     --font-mono:
-      ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas, "Noto Sans Mono", "Yu Gothic",
-      monospace;
+      ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas,
+      "Noto Sans Mono", "Yu Gothic", monospace;
 
     --t-2xs: 0.6875rem;
     --t-xs: 0.75rem;
@@ -422,7 +422,7 @@
        現れたあとの姿は変数に持たせる。キーフレームの終点から参照するため。 */
     --bar-fill: color-mix(in oklab, var(--ground) 68%, transparent);
     background: var(--bar-fill);
-    backdrop-filter: blur(20px) saturate(190%);
+    backdrop-filter: blur(4px);
     box-shadow: 0 14px 34px -24px oklch(0 0 0 / 0.7);
   }
   /* ブラーが無い環境では透けたままになるので、塗りで代わりに伏せる。 */
@@ -457,7 +457,7 @@
       border-color: var(--rule);
       background-color: var(--bar-fill);
       box-shadow: 0 14px 34px -24px oklch(0 0 0 / 0.7);
-      backdrop-filter: blur(20px) saturate(190%);
+      backdrop-filter: blur(4px);
     }
   }
   /* 角括弧は「マークが無い」ことの代わりだった。実物のアイコンが入るなら
@@ -576,7 +576,8 @@
   .nav a[aria-current="page"] {
     color: var(--ink-strong);
     background: var(--accent-wash);
-    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 40%, transparent);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in oklab, var(--accent) 40%, transparent);
   }
 
   @media (width < 44rem) {
