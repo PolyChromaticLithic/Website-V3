@@ -414,13 +414,15 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 0.4rem 0.45rem 0.4rem 1.15rem;
+    padding-block: 0.4rem;
+    padding-inline: var(--bar-pad);
     border: 1px solid var(--rule);
     border-radius: var(--pill);
     /* 塗りが濃いとブラーは掛かっていても見えない。硝子として読ませるには
        下が透けて見える程度まで薄くする必要がある。
        現れたあとの姿は変数に持たせる。キーフレームの終点から参照するため。 */
     --bar-fill: color-mix(in oklab, var(--ground) 68%, transparent);
+    --bar-pad: 1.15rem 0.45rem;
     background: var(--bar-fill);
     backdrop-filter: blur(20px) saturate(190%);
     box-shadow: 0 14px 34px -24px oklch(0 0 0 / 0.7);
@@ -439,6 +441,15 @@
      動きを許さない環境では、引き続き「現れたあと」が既定。 */
   @media (prefers-reduced-motion: no-preference) {
     @supports (animation-timeline: scroll()) {
+      /* 最上部では左右の余白を .rack から .rack__bar へ渡す。板が画面幅まで
+         広がり、その内側の余白がそのまま版面の左右になる。硝子が現れるのに
+         合わせて余白を返すと、板は版面から浮いた元の幅へ戻る。 */
+      .rack {
+        padding-inline: 0;
+        animation: rack-open linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0 180px;
+      }
       .rack__bar {
         border-color: transparent;
         background-color: transparent;
@@ -446,10 +457,22 @@
         /* フィルタも一緒に消す。塗りが無くても saturate だけ効いていると、
            最上部で板の輪郭が色の差として出てしまう。 */
         backdrop-filter: blur(0) saturate(100%);
+        /* 硝子が無いあいだ、板の内側の余白は見えないまま効いている。中身だけが
+           版面から離れて見えるのはそのため。最上部では版面に合わせる。
+           引くのは、透明でも箱に残る枠線 1px と、右端の中身が押せる大きさの
+           ために内側へ持っている余白 0.7rem（ボタンは 2.3rem の中の 1rem の
+           グリフで 0.65rem、リンクは 0.75rem）。そろえるのは箱の縁ではなく
+           線の側なので、その半端を引く。 */
+        padding-inline: calc(var(--gap) - 1px) calc(var(--gap) - 1px - 0.7rem);
         animation: bar-settle linear both;
         animation-timeline: scroll(root block);
         animation-range: 0 180px;
       }
+    }
+  }
+  @keyframes rack-open {
+    to {
+      padding-inline: var(--gap);
     }
   }
   @keyframes bar-settle {
@@ -458,6 +481,7 @@
       background-color: var(--bar-fill);
       box-shadow: 0 14px 34px -24px oklch(0 0 0 / 0.7);
       backdrop-filter: blur(20px) saturate(190%);
+      padding-inline: var(--bar-pad);
     }
   }
   /* 角括弧は「マークが無い」ことの代わりだった。実物のアイコンが入るなら
