@@ -124,6 +124,10 @@
     /* 背景は html に。body の裏へ盤面を敷くため。 */
     background: var(--ground);
     scroll-padding-top: calc(var(--dock) + 1.5rem);
+    /* 縦スクロールバーの幅を、出ないページでも空けておく。中央寄せの基準に
+       する幅がページごとに変わらなくなり、1 画面で収まるページへ移ったとき
+       ヘッダーがスクロールバーの半分ぶん右へずれるのを止める。 */
+    scrollbar-gutter: stable;
   }
 
   body {
