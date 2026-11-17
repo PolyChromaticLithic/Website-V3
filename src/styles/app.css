@@ -733,6 +733,36 @@
       inset-block-start: 0.4rem;
       inset-inline-end: var(--bar-pad-end);
     }
+    /* 何もないところを押したら閉じる。開いている間だけ、ボタン（summary）の
+       擬似要素を画面いっぱいに広げておく。擬似要素への操作は summary への
+       操作なので、そこを押すと details が閉じる。JS は要らない。
+
+       position: fixed は使えない。板は backdrop-filter を持つので、中の fixed は
+       画面ではなく板を基準にしてしまう。板から上下左右に画面 1 枚ぶん広げて覆う。
+       z-index: -1 で板の中身（パンくず・ナビ）の下、板の塗りとページの上に入る。 */
+    .menu[open] > summary::before {
+      content: "";
+      position: absolute;
+      inset: -100vh -100vw;
+      z-index: -1;
+      cursor: default;
+    }
+    /* パンくずとナビは、覆いより手前に明示して置く。重なり順を成り行きに
+       任せると、ナビが覆いの下に入ってリンクが押せなくなる。 */
+    .trail,
+    .menu__fold {
+      position: relative;
+      z-index: 1;
+    }
+    .menu::details-content {
+      position: relative;
+      z-index: 1;
+    }
+    /* 覆いの上にいる間も summary の hover になる。画面のどこにいてもボタンが
+       光ってしまうので、開いている間は hover の塗りを出さない。 */
+    .menu[open] > summary:hover {
+      background: transparent;
+    }
     .menu .nav {
       flex-direction: column;
       gap: 0.2rem;
