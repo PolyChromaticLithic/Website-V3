@@ -73,11 +73,11 @@
     --glow-c: oklch(0.5 0.1 300 / 0.075);
 
     --font-sans:
-      system-ui, -apple-system, "Segoe UI", "Hiragino Sans",
-      "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+      "Yu Gothic", Meiryo, sans-serif;
     --font-mono:
-      ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas,
-      "Noto Sans Mono", "Yu Gothic", monospace;
+      ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas, "Noto Sans Mono", "Yu Gothic",
+      monospace;
 
     --t-2xs: 0.6875rem;
     --t-xs: 0.75rem;
@@ -563,10 +563,14 @@
 
   /* ── ナビゲーション。details だけで開閉するので JS は 0 バイト。 */
   /* 道が伸びてもメニューは縮ませない。畳むのは道の側の仕事。 */
-  .menu {
+  .menu,
+  .nav--bar {
     flex: none;
   }
-  .menu > summary {
+  /* ナビは 2 つある。広い画面では素の nav（.nav--bar）だけ、狭い画面では
+     details（.menu）だけを出す。閉じた details の中身を CSS でこじ開ける
+     必要が無いので、::details-content を知らないブラウザでもナビが消えない。 */
+  .menu {
     display: none;
   }
   .nav {
@@ -593,11 +597,13 @@
   .nav a[aria-current="page"] {
     color: var(--ink-strong);
     background: var(--accent-wash);
-    box-shadow: inset 0 0 0 1px
-      color-mix(in oklab, var(--accent) 40%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 40%, transparent);
   }
 
   @media (width < 44rem) {
+    .nav--bar {
+      display: none;
+    }
     .menu > summary {
       display: grid;
       place-items: center;
@@ -647,33 +653,124 @@
       transform: rotate(-45deg);
     }
 
-    .nav {
+    /* ── 狭い画面のメニュー。別の箱を下にぶら下げるのではなく、ヘッダーの板
+       そのものが下へ伸びて、その中にナビが現れる。
+
+       板を折り返しのある flex にして、開いた details を 2 行目いっぱいに取らせる。
+       ナビは板の中の普通の中身なので、板の高さは中身に合わせて勝手に決まる
+       （項目の数や高さを CSS に書き写さなくてよい）。
+       ボタンだけは 1 行目の右端に留めたいので、流れから外して板に固定する。 */
+    .rack__bar {
+      --bar-pad-start: calc(var(--gap) - var(--rack-inset) - 1px);
+      --bar-pad-end: calc(var(--gap) - var(--rack-inset) - 1px - 0.7rem);
+      /* 伸びた部分で、項目の塗りを板の縁からどれだけ離すか。左右と下で同じ。 */
+      --menu-inset: 0.8rem;
+      flex-wrap: wrap;
+      row-gap: 0;
+      /* 伸びた板に 999px の角丸を掛けると、縦にも丸まって俵形になる。
+         閉じた板の高さ（2.3rem + 上下 0.4rem + 枠 2px）の半分で止めておけば、
+         閉じているときは今までどおりの丸い板、伸びても角だけが丸い。 */
+      border-radius: calc(1.55rem + 1px);
+      transition:
+        background-color 0.3s var(--ease),
+        border-color 0.3s var(--ease);
+    }
+    /* 開いている間は、最上部でも硝子を出す。スクロール連動のアニメーションは
+       通常の宣言より強いので、止めないと最上部でナビが素通しの上に浮く。
+       文字を載せるので、塗りとぼかしは閉じているときより濃くする。 */
+    .rack__bar:has(.menu[open]) {
+      --bar-fill: color-mix(in oklab, var(--ground) 86%, transparent);
+      animation: none;
+      border-color: var(--rule);
+      background-color: var(--bar-fill);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 18px 38px -22px oklch(0 0 0 / 0.7);
+    }
+    /* 1 行目はパンくずだけ。ボタンの高さと、ボタンが載る右の幅を空けておく。 */
+    .trail {
+      flex: 1;
+      margin-inline-end: 2.8rem;
+    }
+    .trail__list {
+      min-height: 2.3rem;
+    }
+    /* 伸びる部分。details を 1 行だけの grid にして、行の高さを 0fr ↔ 1fr で
+       動かす。中身の高さを知らなくても、0 から本来の高さまで滑らかに開閉する。
+       板はそれに押されて伸び縮みする。
+
+       動かす宣言は details 自身に置く。閉じた details の中身はブラウザが
+       描画ごと止めていて（content-visibility: hidden）、スタイルの再計算も
+       されない。中の要素にアニメーションを付けると、2 回目からは「もう済んだ」
+       ままになって動かない。外側の details なら開閉のたびに必ず動く。
+
+       左右は板の内側の余白を打ち消して、縁から --menu-inset のところまで広げる。 */
+    .menu {
+      /* 伸びも縮みもさせる。左右の余白は打ち消す側（負）にも足す側（正）にも
+         なるので、どちらでも 2 行目の幅にちょうど収まるようにする。 */
+      flex: 1 1 100%;
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 0fr;
+      margin-inline: calc(var(--menu-inset) - var(--bar-pad-start))
+        calc(var(--menu-inset) - var(--bar-pad-end));
+    }
+    .menu[open] {
+      grid-template-rows: 1fr;
+    }
+    /* 行に入るのは、新しいブラウザでは ::details-content、それを知らない
+       ブラウザでは .menu__fold。どちらでも 0 まで縮めるように、両方に書く。
+       （知らないセレクタは規則ごと捨てられるので、まとめて書かない。） */
+    .menu::details-content {
+      min-height: 0;
+      overflow: hidden;
+    }
+    .menu__fold {
+      min-height: 0;
+      overflow: hidden;
+    }
+    .menu > summary {
       position: absolute;
-      inset-inline: -1px;
-      inset-block-start: calc(100% + 6px);
+      inset-block-start: 0.4rem;
+      inset-inline-end: var(--bar-pad-end);
+    }
+    .menu .nav {
       flex-direction: column;
       gap: 0.2rem;
-      padding: 0.4rem;
-      border: 1px solid var(--rule);
-      border-radius: 18px;
-      /* 親が backdrop-filter を持つ内側では子の backdrop-filter が効かない。
-         パネルの下地は不透明な塗りで作る。 */
-      background: var(--ground);
-      box-shadow: 0 14px 30px -16px oklch(0 0 0 / 0.55);
+      /* 上はアイコンとボタンの行から離す。同じ間隔のまま続けると、行と項目が
+         ひとかたまりに見える。
+         下は板自身の余白 0.4rem と足して --menu-inset になるようにする。 */
+      padding-block: 1.1rem calc(var(--menu-inset) - 0.4rem);
     }
-    .nav a {
-      padding: 0.65rem 0.95rem;
-      border-radius: 14px;
+    .menu .nav a {
+      padding: 0.5rem 0.9rem;
+      line-height: 1.5;
+      /* 板の角と同心の角丸。板の半径（1.55rem + 枠 1px）から、枠と
+         縁までの間隔を引いた値にすると、角のところで間隔が一定になる。 */
+      border-radius: calc(1.55rem - var(--menu-inset));
     }
-  }
-  /* 44rem 以上ではボタンを消し、閉じていてもナビを出しておく。 */
-  @media (width >= 44rem) {
-    .menu::details-content {
-      content-visibility: visible;
-      block-size: auto;
+    /* ナビは overflow: hidden の中なので、外側に出るフォーカスの輪は切れる。内側に描く。 */
+    .menu .nav a:focus-visible {
+      outline-offset: -2px;
     }
-  }
 
+    @media (prefers-reduced-motion: no-preference) {
+      .menu {
+        transition: grid-template-rows 0.36s var(--ease);
+      }
+      /* 中身は開くときに浮かび、閉じるときは板が縮み終わるまで見えたままにする。
+         content-visibility を遅らせて切り替えるのがその「見えたまま」の部分。
+         対応していないブラウザでは、閉じるときだけ中身が先に消える。 */
+      .menu::details-content {
+        opacity: 0;
+        transition:
+          opacity 0.28s var(--ease),
+          content-visibility 0.36s allow-discrete;
+      }
+      .menu[open]::details-content {
+        opacity: 1;
+      }
+    }
+  }
   /* ── ヒーロー */
   .hero {
     padding-block: clamp(2.75rem, 8vw, 5rem) clamp(1rem, 3vw, 1.75rem);

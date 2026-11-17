@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import PostRow from '../../components/PostRow.astro';
 import { NAV } from '../../config';
 import Base from '../../layouts/Base.astro';
+import { tagHref } from '../../lib/tags';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.published.getTime() - a.data.published.getTime(),
@@ -35,7 +36,7 @@ const total = entries.length + works.length + posts.length + tags.length;
 
   <div class="shell blocks">
     <section class="block">
-      <p class="block__label">Pages</p>
+      <h2 class="block__label">Pages</h2>
       <div class="rows">
         {
           entries.map((entry) => (
@@ -51,7 +52,7 @@ const total = entries.length + works.length + posts.length + tags.length;
     </section>
 
     <section class="block">
-      <p class="block__label">Works</p>
+      <h2 class="block__label">Works</h2>
       <div class="rows">
         {
           works.map((work) => (
@@ -72,7 +73,7 @@ const total = entries.length + works.length + posts.length + tags.length;
     </section>
 
     <section class="block">
-      <p class="block__label">Blog</p>
+      <h2 class="block__label">Blog</h2>
       {/* 一覧としては題名と日付だけで足りる。要約は記事側と /blog/ に置いてある。 */}
       <div class="rows">
         {posts.map((post) => <PostRow post={post} showSummary={false} />)}
@@ -80,14 +81,14 @@ const total = entries.length + works.length + posts.length + tags.length;
     </section>
 
     <section class="block">
-      <p class="block__label">Tags</p>
+      <h2 class="block__label">Tags</h2>
       <p class="row__meta">
-        {tags.map((tag) => <a class="tag" href={`/tags/${tag}/`}>{tag}</a>)}
+        {tags.map((tag) => <a class="tag" href={tagHref(tag)}>{tag}</a>)}
       </p>
     </section>
 
     <section class="block">
-      <p class="block__label">Machine readable</p>
+      <h2 class="block__label">Machine readable</h2>
       {/*
         どちらもビルドの成果物。sitemap-index.xml は @astrojs/sitemap が
         `astro build` のときにだけ書き出すので、`astro dev` では 404 になる。

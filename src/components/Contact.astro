@@ -1,0 +1,35 @@
+---
+/** 連絡先の区画。トップと About の両方に同じものを置く。 */
+const EMAIL = 'polychromaticlithic@outlook.jp';
+
+const SOCIAL = [
+  { label: 'Twitter', href: 'https://twitter.com/PolyChromaticLi' },
+  { label: 'GitHub', href: 'https://github.com/PolyChromaticLithic' },
+  { label: 'Misskey', href: 'https://misskey.io/@As6' },
+];
+---
+
+<section class="block">
+  <h2 class="block__label">Contact</h2>
+  <div class="stack">
+    <div class="stack stack--tight">
+      <p class="limit">ご連絡は以下までお願いします。</p>
+      <p class="mono">
+        <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+      </p>
+    </div>
+    <div class="stack stack--tight">
+      <p class="limit">その他ソーシャルメディア：</p>
+      <p class="mono">
+        {
+          SOCIAL.map((item, i) => (
+            <>
+              {i > 0 && ' · '}
+              <a href={item.href} target="_blank" rel="noopener noreferrer">{item.label}</a>
+            </>
+          ))
+        }
+      </p>
+    </div>
+  </div>
+</section>

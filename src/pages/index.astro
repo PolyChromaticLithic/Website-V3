@@ -1,6 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
+import Contact from '../components/Contact.astro';
 import PostRow from '../components/PostRow.astro';
+import { SITE } from '../config';
 import Base from '../layouts/Base.astro';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft))
@@ -15,10 +17,8 @@ const works = (await getCollection('works', ({ data }) => !data.draft)).sort(
 <Base>
   <section class="shell hero">
     <p class="mono muted">Index</p>
-    <h1 class="display hero__title">Astarの素敵なホームページ V3</h1>
-    <p class="hero__tagline">
-      UnityとかC#とかをやってます
-    </p>
+    <h1 class="display hero__title">{SITE.name}</h1>
+    <p class="hero__tagline">{SITE.tagline}</p>
   </section>
 
   <div class="shell blocks">
@@ -78,20 +78,6 @@ const works = (await getCollection('works', ({ data }) => !data.draft)).sort(
       </div>
     </section>
 
-    <section class="block">
-      <h2 class="block__label">Contact</h2>
-      <div class="stack">
-        <p class="limit">ご連絡は以下までお願いします。</p>
-        <p class="mono">
-          <a href="mailto:polychromaticlithic@outlook.jp">polychromaticlithic@outlook.jp</a>
-        </p>
-        <p class="limit">その他ソーシャルメディア：</p>
-        <p class="mono">
-          <a href="https://twitter.com/PolyChromaticLi" target="_blank" rel="noopener noreferrer">Twitter</a>
-          <a href="https://github.com/PolyChromaticLithic" target="_blank" rel="noopener noreferrer">GitHub</a>
-          <a href="https://misskey.io/@As6" target="_blank" rel="noopener noreferrer">Misskey</a>
-        </p>
-      </div>
-    </section>
+    <Contact />
   </div>
 </Base>

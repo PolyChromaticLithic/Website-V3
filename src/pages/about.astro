@@ -1,4 +1,5 @@
 ---
+import Contact from '../components/Contact.astro';
 import { SITE } from '../config';
 import Base from '../layouts/Base.astro';
 
@@ -36,7 +37,7 @@ const STACK = [
 
   <div class="shell blocks">
     <section class="block">
-      <p class="block__label">Profile</p>
+      <h2 class="block__label">Profile</h2>
       <div class="prose">
         <p>
           高専生です。UnityとC#が好物です。Web製作とかもやります。
@@ -45,12 +46,12 @@ const STACK = [
     </section>
 
     <section class="block">
-      <p class="block__label">Stack</p>
+      <h2 class="block__label">Stack</h2>
       <div class="tiers">
         {
-          STACK.map((tier) => (
-            <div class:list=['tier']>
-              <p class="tier__name">{tier.name}</p>
+          STACK.map((tier, i) => (
+            <div class:list={['tier', i === 0 && 'tier--core']}>
+              <h3 class="tier__name">{tier.name}</h3>
               <ul class="tier__list">
                 {tier.items.map((item) => (
                   <li>{item}</li>
@@ -62,24 +63,6 @@ const STACK = [
       </div>
     </section>
 
-    <section class="block">
-      <h2 class="block__label">Contact</h2>
-      <div class="stack">
-        <div class="stack stack--tight">
-          <p class="limit">ご連絡は以下までお願いします。</p>
-          <p class="mono">
-            <a href="mailto:polychromaticlithic@outlook.jp">polychromaticlithic@outlook.jp</a>
-          </p>
-        </div>
-        <div class="stack stack--tight">
-          <p class="limit">その他ソーシャルメディア：</p>
-          <p class="mono">
-            <a href="https://twitter.com/PolyChromaticLi" target="_blank" rel="noopener noreferrer">Twitter</a>
-            <a href="https://github.com/PolyChromaticLithic" target="_blank" rel="noopener noreferrer">GitHub</a>
-            <a href="https://misskey.io/@As6" target="_blank" rel="noopener noreferrer">Misskey</a>
-          </p>
-        </div>
-      </div>
-    </section>
+    <Contact />
   </div>
 </Base>

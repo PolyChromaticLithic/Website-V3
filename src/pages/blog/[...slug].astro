@@ -3,6 +3,7 @@ import { getCollection, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
 import { formatDate, isoDate } from '../../lib/date';
+import { tagHref } from '../../lib/tags';
 
 export const getStaticPaths = (async () => {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
@@ -26,7 +27,12 @@ const { published, updated } = post.data;
 const revised = updated && updated.getTime() !== published.getTime() ? updated : null;
 ---
 
-<Base title={post.data.title} description={post.data.summary} ogType="article">
+<Base
+  title={post.data.title}
+  description={post.data.summary}
+  ogType="article"
+  article={{ published, updated: revised }}
+>
   <article>
     <header class="shell page-head">
       <p class="mono muted byline">
@@ -42,7 +48,7 @@ const revised = updated && updated.getTime() !== published.getTime() ? updated :
       </p>
       <h1 class="h2 page-head__title">{post.data.title}</h1>
       <p class="row__meta page-head__meta">
-        {post.data.tags.map((tag) => <a class="tag" href={`/tags/${tag}/`}>{tag}</a>)}
+        {post.data.tags.map((tag) => <a class="tag" href={tagHref(tag)}>{tag}</a>)}
       </p>
     </header>
 

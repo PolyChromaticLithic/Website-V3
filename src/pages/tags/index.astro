@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import { tagHref } from '../../lib/tags';
 
 const posts = await getCollection('blog', ({ data }) => !data.draft);
 
@@ -27,7 +28,7 @@ const tags = [
 
   <div class="shell blocks">
     <section class="block">
-      <p class="block__label">Tags</p>
+      <h2 class="block__label">Tags</h2>
       {
         tags.length === 0 ? (
           <p class="empty">
@@ -37,7 +38,7 @@ const tags = [
         ) : (
           <div class="rows">
             {tags.map(([name, count]) => (
-              <a class="row" href={`/tags/${name}/`}>
+              <a class="row" href={tagHref(name)}>
                 <span class="row__date">{count} 件</span>
                 <div>
                   <span class="row__title">{name}</span>

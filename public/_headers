@@ -7,11 +7,16 @@
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 
-/icon.jpg
+/icon.*
   Cache-Control: public, max-age=604800
 
 /avatar*
   Cache-Control: public, max-age=604800
 
-/*.html
-  Cache-Control: public, max-age=0, must-revalidate
+/favicon.*
+  Cache-Control: public, max-age=604800
+
+# HTML には何も書かない。Cloudflare Pages の既定が
+# `public, max-age=0, must-revalidate`（毎回検証）なので、それに任せる。
+# ページは /blog/ のような拡張子の無い URL で配られるため、
+# `/*.html` と書いてもどのページにも当たらない。

@@ -3,13 +3,24 @@ import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import PostRow from '../../components/PostRow.astro';
 import Base from '../../layouts/Base.astro';
+import { tagSlug } from '../../lib/tags';
 
 export const getStaticPaths = (async () => {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
   const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
 
+  // 別のタグが同じ URL に落ちたら、片方のページが黙って消える。ビルドを止めて知らせる。
+  const bySlug = new Map<string, string>();
+  for (const tag of tags) {
+    const slug = tagSlug(tag);
+    const clash = bySlug.get(slug);
+    if (clash)
+      throw new Error(`タグ "${clash}" と "${tag}" が同じ URL (/tags/${slug}/) になります`);
+    bySlug.set(slug, tag);
+  }
+
   return tags.map((tag) => ({
-    params: { tag },
+    params: { tag: tagSlug(tag) },
     props: {
       tag,
       posts: posts
@@ -34,7 +45,7 @@ const { tag, posts } = Astro.props;
 
   <div class="shell blocks">
     <section class="block">
-      <p class="block__label">Posts</p>
+      <h2 class="block__label">Posts</h2>
       <div class="rows">
         {posts.map((post) => <PostRow post={post} />)}
       </div>

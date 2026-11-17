@@ -62,21 +62,41 @@ const trail = notFound ? UNKNOWN_TRAIL : crumbsFor(path, crumb);
       </ol>
     </nav>
 
+    {/*
+      ナビは同じ中身を 2 つ置き、幅で片方だけを出す（もう片方は display: none
+      なので読み上げにも出ない）。広い画面では素の nav、狭い画面では details の中。
+      1 つの details を広い画面で開いたままに見せる方法は ::details-content が
+      要り、対応していないブラウザではナビごと消えてしまう。数百バイトの重複で
+      どのブラウザでも必ず出る方を取る。
+    */}
+    <nav class="nav nav--bar" aria-label="サイト内">
+      {
+        NAV.map((item) => (
+          <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
     {/* 開閉は details / summary。JS を 1 バイトも足さずにキーボードでも操作できる。 */}
     <details class="menu">
       <summary>
         <span class="menu__glyph"></span>
         <span class="visually-hidden">メニュー</span>
       </summary>
-      <nav class="nav" aria-label="サイト内">
-        {
-          NAV.map((item) => (
-            <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
-              {item.label}
-            </a>
-          ))
-        }
-      </nav>
+      {/* 外側の箱は高さを 0 から開くための枠。板はこれに押されて下へ伸びる。 */}
+      <div class="menu__fold">
+        <nav class="nav" aria-label="サイト内">
+          {
+            NAV.map((item) => (
+              <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
     </details>
   </div>
 </header>

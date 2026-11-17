@@ -12,7 +12,7 @@ pnpm install
 pnpm dev       # http://localhost:4321
 pnpm build     # 型チェック → ビルド → 転送量の計測と刻印
 pnpm preview   # dist/ をローカルで配信
-pnpm check     # astro check + biome ci
+pnpm check     # astro check + biome ci（GitHub Actions でも push ごとに走る）
 pnpm fix       # biome で整形・自動修正
 ```
 
@@ -26,7 +26,7 @@ pnpm fix       # biome で整形・自動修正
 | サブリソース | ヘッダーのアイコン 1 枚だけ。data URI にすれば 1 ページ = 1 リクエストに戻る |
 | ページ遷移 | CSS の `@view-transition` と Speculation Rules。どちらも実行 JS なし |
 | ダークモード | `prefers-color-scheme` のみ。トグルを付けると JS が必要になるので付けない |
-| ナビゲーション | `details` / `summary` の開閉だけ。狭い画面ではハンバーガーになる |
+| ナビゲーション | 広い画面は素の `nav`、狭い画面は `details` / `summary` のハンバーガー |
 | 背景の装飾 | CSS スクロール駆動アニメーション（`animation-timeline`）。コンポジタで動く |
 | 転送量 | 1 ページ 8 KiB（Brotli）以内。超えたらビルドが失敗する |
 
@@ -43,8 +43,10 @@ pnpm fix       # biome で整形・自動修正
 不動点は素朴な反復だけだと 2 周期に落ちることがある。そこで「10 文字に詰めるときの
 詰め方」——前詰めか後詰めか、余りを空白・タブ・改行のどれで埋めるか——を回して写像を
 ずらし、厳密に一致する組み合わせを探している。HTML では連続する空白類が 1 個に畳まれる
-ので、どれを選んでも表示は 1 ピクセルも変わらない
-（詳細はスクリプト内のコメントと `src/content/blog/byte-budget.md`）。
+ので、どれを選んでも表示は 1 ピクセルも変わらない（詳細はスクリプト内のコメント）。
+
+予算は `src/config.ts` をスクリプトが直接読む。`.ts` をそのまま読むので Node 22.18 以上が
+要る。読めなかったときは既定値に逃げず、ビルドを落とす。
 
 読み取り値はフッターの数字 3 つだけ。ゲージやバーは置かない。
 
@@ -76,7 +78,10 @@ draft: false          # true の間は公開されない
 ---
 ```
 
-ファイル名がそのまま URL になる（`byte-budget.md` → `/blog/byte-budget/`）。
+ファイル名がそのまま URL になる（`new-website.md` → `/blog/new-website/`）。
+
+RSS（`/rss.xml`）には本文も入る。XML サイトマップの `lastmod` は `updated`
+（無ければ `published`）から付く。
 
 ## 作品を追加する
 
@@ -95,14 +100,20 @@ draft: false          # true の間は公開されない
 4. 独自ドメインを Custom domains から接続する
 
 `public/_headers` がキャッシュとセキュリティヘッダを指定する。ハッシュ付きアセットは
-1 年 immutable、HTML は毎回検証。
+1 年 immutable。HTML は Cloudflare Pages の既定（毎回検証）に任せている。
 
-## 公開前に差し替えるもの
+## CI（GitHub Actions）
 
-- `src/config.ts` … `origin` / `name` / `tagline`
-- `public/robots.txt` … Sitemap の URL
-- `src/pages/about.astro`、`src/pages/index.astro` … 本文とメールアドレス
-- `src/content/works/sample-tool.md` … サンプルなので削除するか書き換える
+`.github/workflows/ci.yml` が main への push と PR で `pnpm check` と `pnpm build` を回す。
+デプロイは Cloudflare Pages 側のビルドが行うので、CI が落ちてもデプロイは止まらない。
+整形や lint の崩れに気づくためのもの。
+
+## 書き換える場所
+
+- `src/config.ts` … `origin` / `name` / `tagline` / アイコンと共有画像
+- `public/robots.txt` … Sitemap の URL（ドメインを変えたとき）
+- `src/components/Contact.astro` … メールアドレスと SNS のリンク
+- `src/pages/about.astro` … プロフィールと技術スタック
 
 ## ディレクトリ
 
@@ -115,12 +126,15 @@ src/
     works/             作品
   components/
     SpecStrip.astro    実測値の読み取り（右端に縦、狭い画面ではフッター）
-    SiteHeader.astro   浮いたラック。details でハンバーガーになる
+    SiteHeader.astro   浮いたラック。狭い画面では details のハンバーガー
     SiteFooter.astro
+    Contact.astro      連絡先の区画（トップと About で共用）
     PostRow.astro      公開日と、あれば更新日
   layouts/Base.astro   <head> の一元管理
   lib/
+    crumbs.ts          URL からパンくずを作る
     date.ts
+    tags.ts            タグのページへのパス（エンコード込み）
     rehype-table-scroll.ts  表を横スクロールする箱で包む
   pages/               ルーティング
   styles/app.css       @layer で構成した単一のスタイルシート
@@ -128,6 +142,10 @@ scripts/
   stamp-metrics.mjs    転送量の計測・刻印・予算チェック
 public/
   _headers             Cloudflare のヘッダ設定
+  icon.webp            ヘッダーのアイコン（96 px 角）
+  icon.jpg             共有画像（og:image、400 px 角）
+  favicon.png          タブのアイコン（64 px 角、約 1.5 KB）
+.github/workflows/ci.yml  型チェック・biome・ビルドを回す
 ```
 
 ## デザイン — Console × Depth
@@ -158,9 +176,17 @@ public/
   なるので、外側の `.rack` に付けると中の `backdrop-filter` は自分の内側しか
   写さない。名前は板そのもの（`.rack__bar`）に付ける。
   現在地は塗りと内枠で示し、44rem 未満では `details` のハンバーガーに畳まれる。
+  開くと別の箱がぶら下がるのではなく、板そのものが下へ伸びて中にナビが現れる。
+  板を折り返す flex にして開いた `details` を 2 行目に取らせ、高さは
+  `grid-template-rows` を 0fr ↔ 1fr に動かして開閉する（項目数を CSS に書かない）。
+  動かす宣言は `details` 自身に置く。閉じた `details` の中身はスタイルの再計算が
+  止まるので、中の要素に付けたアニメーションは 2 回目から動かない。
+  ナビは同じ中身を 2 つ置いて幅で片方だけ出す。1 つの `details` を広い画面で
+  開いたままに見せるには `::details-content` が要り、未対応のブラウザでは
+  ナビごと消えるため。
 - **アイコン** … 名前の左に円形（`border-radius: 50%` + `object-fit: cover`）。
   差し替えは `src/config.ts` の `SITE.avatar` 1 か所。正方形で中央に寄せた絵が合う。
-  `public/avatar.svg` は差し替え前提の仮置き。実体は下の「アイコン」を見る。
+  いまは `public/icon.webp`（96 px 角、約 3 KB）。詳しくは下の「アイコン」を見る。
 - **読み取り値** … 78rem 以上では右の余白に縦組みで垂らし、
   それ未満ではフッターの刻印に戻る。出るのはどちらか一方だけ。
 - **一覧** … 日付・本文・タグの 3 列。hover と focus で余白を変えないので、
@@ -175,6 +201,9 @@ data URI を直接書く方法の 2 つがある。
 public/avatar.webp を置いて  avatar: '/avatar.webp'   … 読み込みが 1 つ増える（request 2）
 data URI を直接書く          avatar: 'data:image/webp;base64,...'  … request 1 のまま
 ```
+
+表示は 26 px 角ほどなので、高精細の画面を見込んでも 96 px 角あれば足りる。
+共有されたときの画像（`og:image`）は別で、`SITE.ogImage` が指す大きい方を使う。
 
 data URI は base64 のぶん約 4/3 に膨らみ、Brotli も効きにくい。転送量の予算
 （1 ページ 8 KiB）に載せるので、64〜96 px 角の WebP まで小さくしてから埋める。

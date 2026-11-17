@@ -16,6 +16,8 @@ interface Props {
   crumb?: string | undefined;
   /** 404 のように行き先の分からないページ。現在地を ?? 1 段だけにする。 */
   notFound?: boolean | undefined;
+  /** 記事のページだけが渡す。公開日と更新日を OGP と構造化データに出す。 */
+  article?: { published: Date; updated?: Date | null | undefined } | undefined;
 }
 
 const {
@@ -24,9 +26,32 @@ const {
   ogType = 'website',
   crumb,
   notFound = false,
+  article,
 } = Astro.props;
 const pageTitle = title ? `${title} — ${SITE.name}` : `${SITE.name} — ${SITE.tagline}`;
-const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.origin);
+const origin = Astro.site ?? SITE.origin;
+const canonical = new URL(Astro.url.pathname, origin);
+/** 共有先は自分のサイトの外から読みに来るので、絶対 URL で渡す。 */
+const ogImage = new URL(SITE.ogImage, origin);
+
+/**
+ * 検索エンジン向けの構造化データ。type が ld+json の script は実行されない
+ * データなので、配信する JS は 0 バイトのまま。
+ * `<` を逃がしておく。題名に </script> が入っても外へ出られないように。
+ */
+const jsonLd = article
+  ? JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: title,
+      description,
+      url: canonical.href,
+      image: ogImage.href,
+      datePublished: article.published.toISOString(),
+      dateModified: (article.updated ?? article.published).toISOString(),
+      author: { '@type': 'Person', name: SITE.author, url: SITE.origin },
+    }).replaceAll('<', '\\u003c')
+  : null;
 ---
 
 <!doctype html>
@@ -37,21 +62,39 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.origin);
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" href="/icon.jpg" type="image/jpeg" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={title ?? SITE.name} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content={SITE.locale} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:image" content={ogImage} />
     <meta name="twitter:card" content="summary" />
+    {
+      article && (
+        <meta property="article:published_time" content={article.published.toISOString()} />
+      )
+    }
+    {
+      article?.updated && (
+        <meta property="article:modified_time" content={article.updated.toISOString()} />
+      )
+    }
+    {jsonLd && <script type="application/ld+json" is:inline set:html={jsonLd} />}
 
-    {/* ホバー時に次ページを先読みする。実行 JS ではなく宣言的なヒント。 */}
+    {/*
+      ホバー時に次ページを先読みする。実行 JS ではなく宣言的なヒント。
+      RSS や XML サイトマップはページではないので、先読みの対象から外す。
+    */}
     <script type="speculationrules" is:inline>
       {
         "prerender": [
           {
-            "where": { "href_matches": "/*" },
+            "where": {
+              "and": [{ "href_matches": "/*" }, { "not": { "href_matches": "/*.xml" } }]
+            },
             "eagerness": "moderate"
           }
         ]

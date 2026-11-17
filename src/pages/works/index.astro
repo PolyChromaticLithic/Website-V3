@@ -17,7 +17,7 @@ const works = (await getCollection('works', ({ data }) => !data.draft)).sort(
     {
       works.length === 0 && (
         <section class="block">
-          <p class="block__label">Empty</p>
+          <h2 class="block__label">Empty</h2>
           <p class="empty">
             <b>公開できる作品がまだありません</b>
             残念……

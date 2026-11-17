@@ -39,13 +39,15 @@ const PADDINGS = FILLS.flatMap((fill) => [
 const budget = await loadBudget();
 
 async function loadBudget() {
-  try {
-    // Node 22.18+ / 24 は .ts をそのまま読める（型注釈を落とすだけ）。
-    const mod = await import(pathToFileURL(resolve('src/config.ts')).href);
-    return mod.SITE.budgetBrotli;
-  } catch {
-    return 8 * 1024;
+  // Node 22.18+ / 24 は .ts をそのまま読める（型注釈を落とすだけ）。
+  // 読めなかったときに既定値へ逃げると、config の予算を変えても黙って
+  // 無視されることになる。読めないならビルドごと落とす。
+  const mod = await import(pathToFileURL(resolve('src/config.ts')).href);
+  const value = mod.SITE?.budgetBrotli;
+  if (!Number.isFinite(value)) {
+    throw new Error('src/config.ts の SITE.budgetBrotli が数値ではありません');
   }
+  return value;
 }
 
 async function* walk(dir) {
